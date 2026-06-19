@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cmdrCtrl</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       GLOBAL STYLE & THEME VARIABLES
+       ========================================================================== */
+    :root {
+      --app-bg: #050505;
+      --panel-bg: #0b0b0b;
+      --panel-border: #1a1a1a;
+      --accent: #ca8a04;
+      --accent-hover: #e0a010;
+      --text-primary: #cccccc;
+      --text-secondary: #666666;
+      --tile-bg: #111111;
+      --tile-hover: #161616;
+      --border-radius: 8px;
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+
+    body {
+      background: var(--app-bg);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image: radial-gradient(circle at 50% 0%, #111111 0%, #050505 100%);
+    }
+
+    .app-container {
+      max-width: 1100px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Branded Tag */
+    .brand-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+      transition: color 0.3s;
+    }
+    
+    .brand-header span {
+      color: var(--accent);
+    }
+
+    .brand-header.scanning {
+      color: var(--accent);
+    }
+
+    /* Active Grid Area */
+    .dial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+
+    .dial-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+      color: var(--text-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .dial-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform 0.2s;
+    }
+
+    .dial-card:hover {
+      background: var(--tile-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    .dial-card:hover::before {
+      transform: scaleY(1);
+    }
+
+    .card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-filename {
+      font-family: monospace;
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    .card-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.02);
+      padding-top: 10px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .dial-card:hover .card-footer {
+      color: var(--accent);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Warning Banner for Local file:// Protocol */
+    .protocol-warning {
+      background: rgba(202, 138, 4, 0.05);
+      border: 1px solid rgba(202, 138, 4, 0.2);
+      border-radius: var(--border-radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+      width: 100%;
+    }
+
+    .protocol-warning i {
+      font-size: 24px;
+      color: var(--accent);
+    }
+
+    .protocol-warning-text h4 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .protocol-warning-text p {
+      font-size: 11px;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Local file protocol warning container -->
+    <div id="protocolWarning" class="protocol-warning hidden">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="protocol-warning-text">
+        <h4>CORS Restrictions Active</h4>
+        <p>Your browser is blocking local scanning via the <code>file://</code> protocol. Please run this page using a local web server (e.g. VS Code "Live Server" or Python's <code>python -m http.server</code>) to allow directory discovery.</p>
+      </div>
+    </div>
+
+    <div class="brand-header" id="brandHeader">
+      <i class="fas fa-satellite-dish"></i> cmdr<span>Ctrl</span>
+    </div>
+    
+    <div class="dial-grid" id="dialGrid"></div>
+  </div>
+
+  <script>
+    // Modules list to probe on local storage path
+    const modules = [
+      "Bingo", "Keybinds", "Generator", "Links", "Slots", "Loadout", 
+      "Suite", "Radar", "Market", "Cmdrctrl", "CmdrCtrl", "SlotsMachine",
+      "Slotsmachine"
+    ];
+
+    // Probe file utility (Check if file actually exists on local server)
+    async function checkFileExists(filename) {
+      try {
+        // Try a clean GET with no complicated headers/cache restrictions to avoid server rejection
+        const response = await fetch(filename, { method: 'GET' });
+        return response.ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // Auto scanning execution block
+    async function scan() {
+      const header = document.getElementById('brandHeader');
+      const grid = document.getElementById('dialGrid');
+      const warning = document.getElementById('protocolWarning');
+      
+      // If we are on the file:// protocol, warn the user immediately
+      if (window.location.protocol === 'file:') {
+        warning.classList.remove('hidden');
+      } else {
+        warning.classList.add('hidden');
+      }
+
+      header.classList.add('scanning');
+
+      let html = '';
+      let discoveredCount = 0;
+      const discovered = new Set();
+
+      for (const name of modules) {
+        const filename = `index${name}.html`;
+        const lowerFilename = filename.toLowerCase();
+        
+        // Skip if we already scanned/rendered this file (prevents duplicate tiles on case-insensitive systems)
+        if (discovered.has(lowerFilename)) continue;
+
+        const exists = await checkFileExists(filename);
+
+        if (exists) {
+          discovered.add(lowerFilename);
+          discoveredCount++;
+          html += `
+            <a href="${filename}" class="dial-card" target="_blank">
+              <div class="card-title">${name}</div>
+              <div class="card-filename">${filename}</div>
+              <div class="card-footer">
+                <span>Deploy Module</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </a>
+          `;
+        }
+      }
+
+      grid.innerHTML = html;
+      header.classList.remove('scanning');
+      
+      // Hide the brand tag as well if nothing is found (True blank state)
+      if (discoveredCount === 0) {
+        header.classList.add('hidden');
+      } else {
+        header.classList.remove('hidden');
+      }
+    }
+
+    // Run scanner on DOM load
+    document.addEventListener('DOMContentLoaded', scan);
+  </script>
+</body>
+</html>
