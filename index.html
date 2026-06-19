@@ -1,290 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cmdrCtrl</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    /* ==========================================================================
-       GLOBAL STYLE & THEME VARIABLES
-       ========================================================================== */
-    :root {
-      --app-bg: #050505;
-      --panel-bg: #0b0b0b;
-      --panel-border: #1a1a1a;
-      --accent: #ca8a04;
-      --accent-hover: #e0a010;
-      --text-primary: #cccccc;
-      --text-secondary: #666666;
-      --tile-bg: #111111;
-      --tile-hover: #161616;
-      --border-radius: 8px;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cmdrCtrl · dynamic scanner</title>
+    <!-- Font Awesome 6 (free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Orbitron + Rajdhani from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ── reset & theme ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-    }
+        :root {
+            --app-bg: #050505;
+            --panel-bg: #0b0b0b;
+            --panel-border: #1a1a1a;
+            --accent: #ca8a04;
+            --accent-hover: #e0a010;
+            --text-primary: #cccccc;
+            --text-secondary: #666666;
+            --tile-bg: #111111;
+            --tile-hover: #161616;
+            --border-radius: 8px;
+        }
 
-    body {
-      background: var(--app-bg);
-      color: var(--text-primary);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background-image: radial-gradient(circle at 50% 0%, #111111 0%, #050505 100%);
-    }
+        body {
+            background: var(--app-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background-image: radial-gradient(circle at 50% 0%, #111111 0%, #050505 100%);
+        }
 
-    .app-container {
-      max-width: 1100px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+        .app-container {
+            max-width: 1100px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
 
-    /* Branded Tag */
-    .brand-header {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      user-select: none;
-      transition: color 0.3s;
-    }
-    
-    .brand-header span {
-      color: var(--accent);
-    }
+        /* ── brand header ── */
+        .brand-header {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            transition: color 0.3s;
+        }
+        .brand-header span {
+            color: var(--accent);
+        }
+        .brand-header.scanning {
+            color: var(--accent);
+        }
+        .brand-header .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(202, 138, 4, 0.15);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-left: 6px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    .brand-header.scanning {
-      color: var(--accent);
-    }
+        /* ── grid ── */
+        .dial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
 
-    /* Active Grid Area */
-    .dial-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
-      width: 100%;
-    }
+        .dial-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            color: var(--text-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        .dial-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.2s;
+        }
+        .dial-card:hover {
+            background: var(--tile-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        }
+        .dial-card:hover::before {
+            transform: scaleY(1);
+        }
 
-    .dial-card {
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      text-decoration: none;
-      color: var(--text-primary);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card-filename {
+            font-family: monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+        .card-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 10px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .dial-card:hover .card-footer {
+            color: var(--accent);
+        }
 
-    .dial-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transition: transform 0.2s;
-    }
+        .hidden {
+            display: none !important;
+        }
 
-    .dial-card:hover {
-      background: var(--tile-hover);
-      border-color: var(--accent);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
-    }
+        /* ── warning banner ── */
+        .protocol-warning {
+            background: rgba(202, 138, 4, 0.05);
+            border: 1px solid rgba(202, 138, 4, 0.2);
+            border-radius: var(--border-radius);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .protocol-warning i {
+            font-size: 24px;
+            color: var(--accent);
+        }
+        .protocol-warning-text h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .protocol-warning-text p {
+            font-size: 11px;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+        .protocol-warning-text code {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 0 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: var(--accent);
+        }
 
-    .dial-card:hover::before {
-      transform: scaleY(1);
-    }
+        /* ── empty state ── */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-secondary);
+            border: 1px dashed var(--panel-border);
+            border-radius: var(--border-radius);
+        }
+        .empty-state i {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+        .empty-state h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .empty-state p {
+            font-size: 12px;
+        }
 
-    .card-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .card-filename {
-      font-family: monospace;
-      font-size: 10px;
-      color: var(--text-secondary);
-    }
-
-    .card-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.02);
-      padding-top: 10px;
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .dial-card:hover .card-footer {
-      color: var(--accent);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Warning Banner for Local file:// Protocol */
-    .protocol-warning {
-      background: rgba(202, 138, 4, 0.05);
-      border: 1px solid rgba(202, 138, 4, 0.2);
-      border-radius: var(--border-radius);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 12px;
-      width: 100%;
-    }
-
-    .protocol-warning i {
-      font-size: 24px;
-      color: var(--accent);
-    }
-
-    .protocol-warning-text h4 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
-    .protocol-warning-text p {
-      font-size: 11px;
-      color: var(--text-primary);
-      line-height: 1.4;
-    }
-  </style>
+        /* ── status pill ── */
+        .status-pill {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(202, 138, 4, 0.12);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        .status-pill .count {
+            color: #fff;
+            font-weight: 700;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="app-container">
-    <!-- Local file protocol warning container -->
-    <div id="protocolWarning" class="protocol-warning hidden">
-      <i class="fas fa-exclamation-triangle"></i>
-      <div class="protocol-warning-text">
-        <h4>CORS Restrictions Active</h4>
-        <p>Your browser is blocking local scanning via the <code>file://</code> protocol. Please run this page using a local web server (e.g. VS Code "Live Server" or Python's <code>python -m http.server</code>) to allow directory discovery.</p>
-      </div>
+    <div class="app-container">
+
+        <!-- protocol warning (file://) -->
+        <div id="protocolWarning" class="protocol-warning hidden">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="protocol-warning-text">
+                <h4>CORS Restrictions Active</h4>
+                <p>Your browser is blocking local scanning via the <code>file://</code> protocol.
+                Please run this page using a local web server (e.g. VS Code "Live Server" or
+                <code>python -m http.server</code>) to allow directory discovery.</p>
+            </div>
+        </div>
+
+        <!-- header -->
+        <div class="brand-header" id="brandHeader">
+            <i class="fas fa-satellite-dish"></i> cmdr<span>Ctrl</span>
+            <span class="status-pill" id="statusPill">
+                <span class="count" id="moduleCount">0</span> modules
+            </span>
+            <span class="spinner hidden" id="scanSpinner"></span>
+        </div>
+
+        <!-- grid -->
+        <div class="dial-grid" id="dialGrid"></div>
     </div>
 
-    <div class="brand-header" id="brandHeader">
-      <i class="fas fa-satellite-dish"></i> cmdr<span>Ctrl</span>
-    </div>
-    
-    <div class="dial-grid" id="dialGrid"></div>
-  </div>
+    <script>
+        // ──────────────────────────────────────────────────────────────
+        // 1.  CONFIGURATION
+        // ──────────────────────────────────────────────────────────────
 
-  <script>
-    // Modules list to probe on local storage path
-    const modules = [
-      "Bingo", "Keybinds", "Generator", "Links", "Slots", "Loadout", 
-      "Suite", "Radar", "Market", "Cmdrctrl", "CmdrCtrl", "SlotsMachine",
-      "Slotsmachine"
-    ];
+        // Hardcoded fallback list (only used if manifest + API both fail)
+        const FALLBACK_MODULES = [
+            "Bingo", "Keybinds", "Generator", "Links", "Slots", "Loadout",
+            "Suite", "Radar", "Market", "Cmdrctrl", "CmdrCtrl", "SlotsMachine",
+            "Slotsmachine"
+        ];
 
-    // Probe file utility (Check if file actually exists on local server)
-    async function checkFileExists(filename) {
-      try {
-        // Try a clean GET with no complicated headers/cache restrictions to avoid server rejection
-        const response = await fetch(filename, { method: 'GET' });
-        return response.ok;
-      } catch (e) {
-        return false;
-      }
-    }
+        // Manifest file to fetch (auto-generated by build script)
+        const MANIFEST_PATH = 'modules.json';
 
-    // Auto scanning execution block
-    async function scan() {
-      const header = document.getElementById('brandHeader');
-      const grid = document.getElementById('dialGrid');
-      const warning = document.getElementById('protocolWarning');
-      
-      // If we are on the file:// protocol, warn the user immediately
-      if (window.location.protocol === 'file:') {
-        warning.classList.remove('hidden');
-      } else {
-        warning.classList.add('hidden');
-      }
+        // API endpoint (optional – if your server provides directory listing)
+        const API_ENDPOINT = '/api/modules';
 
-      header.classList.add('scanning');
+        // ──────────────────────────────────────────────────────────────
+        // 2.  DOM REFS
+        // ──────────────────────────────────────────────────────────────
 
-      let html = '';
-      let discoveredCount = 0;
-      const discovered = new Set();
+        const grid = document.getElementById('dialGrid');
+        const header = document.getElementById('brandHeader');
+        const statusPill = document.getElementById('statusPill');
+        const moduleCount = document.getElementById('moduleCount');
+        const spinner = document.getElementById('scanSpinner');
+        const warning = document.getElementById('protocolWarning');
 
-      for (const name of modules) {
-        const filename = `index${name}.html`;
-        const lowerFilename = filename.toLowerCase();
-        
-        // Skip if we already scanned/rendered this file (prevents duplicate tiles on case-insensitive systems)
-        if (discovered.has(lowerFilename)) continue;
+        // ──────────────────────────────────────────────────────────────
+        // 3.  UTILITY FUNCTIONS
+        // ──────────────────────────────────────────────────────────────
 
-        const exists = await checkFileExists(filename);
-
-        if (exists) {
-          discovered.add(lowerFilename);
-          discoveredCount++;
-          html += `
-            <a href="${filename}" class="dial-card" target="_blank">
-              <div class="card-title">${name}</div>
-              <div class="card-filename">${filename}</div>
-              <div class="card-footer">
-                <span>Deploy Module</span>
-                <i class="fas fa-chevron-right"></i>
-              </div>
-            </a>
-          `;
+        /** Show/hide the scanning spinner */
+        function setScanning(active) {
+            spinner.classList.toggle('hidden', !active);
+            header.classList.toggle('scanning', active);
         }
-      }
 
-      grid.innerHTML = html;
-      header.classList.remove('scanning');
-      
-      // Hide the brand tag as well if nothing is found (True blank state)
-      if (discoveredCount === 0) {
-        header.classList.add('hidden');
-      } else {
-        header.classList.remove('hidden');
-      }
-    }
+        /** Render module cards into the grid */
+        function renderModules(modules, totalScanned = 0) {
+            if (!modules || modules.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No Modules Found</h3>
+                        <p>No <code>index*.html</code> files detected in the current directory.</p>
+                    </div>
+                `;
+                moduleCount.textContent = '0';
+                return;
+            }
 
-    // Run scanner on DOM load
-    document.addEventListener('DOMContentLoaded', scan);
-  </script>
+            let html = '';
+            for (const mod of modules) {
+                // mod can be { name, filename } or just a string (filename)
+                let name, filename;
+                if (typeof mod === 'string') {
+                    // if it's a filename like "indexEftRndLoadout.html", extract the "EftRndLoadout" part
+                    const match = mod.match(/^index(.+?)\.html$/i);
+                    name = match ? match[1] : mod.replace(/\.html$/i, '');
+                    filename = mod;
+                } else {
+                    name = mod.name || mod.filename.replace(/^index(.+?)\.html$/i, '$1');
+                    filename = mod.filename;
+                }
+
+                html += `
+                    <a href="${filename}" class="dial-card" target="_blank">
+                        <div class="card-title">${name}</div>
+                        <div class="card-filename">${filename}</div>
+                        <div class="card-footer">
+                            <span>Deploy Module</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                `;
+            }
+
+            grid.innerHTML = html;
+            moduleCount.textContent = String(modules.length);
+
+            // Show status pill
+            statusPill.classList.remove('hidden');
+        }
+
+        /** Show error / fallback state */
+        function showFallback(modules) {
+            renderModules(modules);
+        }
+
+        /** Check if we're on file:// protocol */
+        function isFileProtocol() {
+            return window.location.protocol === 'file:';
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 4.  DISCOVERY STRATEGIES
+        // ──────────────────────────────────────────────────────────────
+
+        /**
+         * Strategy A: fetch a manifest file (modules.json)
+         * Expected format: array of { name, filename } or array of filenames (strings)
+         */
+        async function discoverFromManifest() {
+            try {
+                const res = await fetch(MANIFEST_PATH, { cache: 'no-store' });
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (!Array.isArray(data)) return null;
+                // Normalise: if strings, convert to { name, filename }
+                return data.map(item => {
+                    if (typeof item === 'string') {
+                        const match = item.match(/^index(.+?)\.html$/i);
+                        const name = match ? match[1] : item.replace(/\.html$/i, '');
+                        return { name, filename: item };
+                    }
+                    return item;
+                });
+            } catch (_) {
+                return null;
+            }
+        }
+
+        /**
+         * Strategy B: fetch from server API endpoint (/api/modules)
+         * Expected: JSON array of { name, filename } or filenames (strings)
+         */
+        async function discoverFromAPI() {
+            try {
+                const res = await fetch(API_ENDPOINT, { cache: 'no-store' });
+                if (!res.ok) return null;
+                const data = await res.json();
+                if (!Array.isArray(data)) return null;
+                return data.map(item => {
+                    if (typeof item === 'string') {
+                        const match = item.match(/^index(.+?)\.html$/i);
+                        const name = match ? match[1] : item.replace(/\.html$/i, '');
+                        return { name, filename: item };
+                    }
+                    return item;
+                });
+            } catch (_) {
+                return null;
+            }
+        }
+
+        /**
+         * Strategy C: probe a fixed list of module names (fallback)
+         * Uses fetch() to test each file existence.
+         */
+        async function discoverByProbing(moduleNames) {
+            const found = [];
+            const checked = new Set();
+
+            for (const name of moduleNames) {
+                const filename = `index${name}.html`;
+                const lower = filename.toLowerCase();
+                if (checked.has(lower)) continue;
+                checked.add(lower);
+
+                try {
+                    const res = await fetch(filename, { method: 'HEAD', cache: 'no-store' });
+                    if (res.ok) {
+                        found.push({ name, filename });
+                    }
+                } catch (_) { /* ignore */ }
+            }
+            return found;
+        }
+
+        /**
+         * Strategy D: brute-force scan for index*.html using a wildcard-like approach.
+         * This is the "dynamic" part – we generate candidate names from common patterns
+         * and from the fallback list, plus we can try to infer names from the URL.
+         *
+         * Since we can't list directory contents, we generate a large set of possible
+         * names and test each one via HEAD requests.
+         */
+        async function discoverByBruteForce() {
+            // Start with the fallback list
+            const candidates = new Set();
+
+            // Add all fallback names
+            for (const name of FALLBACK_MODULES) {
+                candidates.add(name);
+            }
+
+            // Add some common variations / extra names that might exist
+            const extraNames = [
+                'EftRndLoadout', 'EftRnd', 'RndLoadout', 'LoadoutEft',
+                'EftLoadout', 'RndEft', 'RandomLoadout', 'EftRandom',
+                'Main', 'Home', 'Dashboard', 'Admin', 'Config',
+                'Settings', 'Profile', 'User', 'Auth', 'Login'
+            ];
+            for (const name of extraNames) {
+                candidates.add(name);
+            }
+
+            // Also try to extract from the current URL path (e.g., if we're in a subdir)
+            const pathParts = window.location.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            if (lastPart && lastPart !== 'index.html' && lastPart !== '') {
+                const base = lastPart.replace(/\.html$/i, '');
+                if (base) candidates.add(base);
+            }
+
+            // Convert to array and probe
+            const found = [];
+            const checked = new Set();
+
+            for (const name of candidates) {
+                const filename = `index${name}.html`;
+                const lower = filename.toLowerCase();
+                if (checked.has(lower)) continue;
+                checked.add(lower);
+
+                try {
+                    const res = await fetch(filename, { method: 'HEAD', cache: 'no-store' });
+                    if (res.ok) {
+                        found.push({ name, filename });
+                    }
+                } catch (_) { /* ignore */ }
+            }
+
+            return found;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 5.  MAIN SCAN ORCHESTRATOR
+        // ──────────────────────────────────────────────────────────────
+
+        async function scan() {
+            // Show file:// warning if needed
+            if (isFileProtocol()) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            setScanning(true);
+            statusPill.classList.add('hidden');
+
+            let modules = null;
+            let usedStrategy = 'none';
+
+            // ── Step 1: try manifest ──
+            if (!modules) {
+                const result = await discoverFromManifest();
+                if (result && result.length > 0) {
+                    modules = result;
+                    usedStrategy = 'manifest';
+                }
+            }
+
+            // ── Step 2: try API ──
+            if (!modules) {
+                const result = await discoverFromAPI();
+                if (result && result.length > 0) {
+                    modules = result;
+                    usedStrategy = 'api';
+                }
+            }
+
+            // ── Step 3: brute-force dynamic scan ──
+            if (!modules) {
+                const result = await discoverByBruteForce();
+                if (result && result.length > 0) {
+                    modules = result;
+                    usedStrategy = 'bruteforce';
+                }
+            }
+
+            // ── Step 4: fallback to probing the hardcoded list ──
+            if (!modules) {
+                const result = await discoverByProbing(FALLBACK_MODULES);
+                if (result && result.length > 0) {
+                    modules = result;
+                    usedStrategy = 'probe-fallback';
+                }
+            }
+
+            // ── Step 5: absolute fallback – show the hardcoded list anyway ──
+            if (!modules) {
+                // Just show the fallback list (without probing)
+                modules = FALLBACK_MODULES.map(name => ({ name, filename: `index${name}.html` }));
+                usedStrategy = 'static-fallback';
+            }
+
+            // ── render ──
+            renderModules(modules);
+
+            // Log strategy used (for debugging)
+            console.log(`[cmdrCtrl] discovered ${modules.length} modules via "${usedStrategy}"`);
+
+            setScanning(false);
+            statusPill.classList.remove('hidden');
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 6.  BOOT
+        // ──────────────────────────────────────────────────────────────
+
+        document.addEventListener('DOMContentLoaded', scan);
+    </script>
+
 </body>
 </html>
