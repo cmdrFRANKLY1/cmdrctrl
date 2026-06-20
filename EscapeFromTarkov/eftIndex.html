@@ -4,371 +4,535 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tarkov · Index</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <style>
+        /* ==========================================================================
+           THEME & GLOBAL VARIABLES (Matching resourceHubV01.html & index.html)
+           ========================================================================== */
+        :root {
+            --bg-color: #030303;
+            --surface-color: rgba(18, 18, 18, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --tile-bg: rgba(18, 18, 18, 0.4);
+            --tile-border: rgba(255, 255, 255, 0.08);
+            --tile-hover: rgba(255, 255, 255, 0.03);
+            --border-radius: 16px;
+            --tile-radius: 12px;
+            --transition-curve: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #000000;
-            --surface: #0a0a0a;
-            --border: #2a2a2a;
-            --border-light: #3a3a3a;
-            --text: #e8e8e8;
-            --text-dim: #777777;
-            --text-muted: #444444;
-            --accent: #ca8a04;
-            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --mono: Consolas, "Courier New", monospace;
-        }
-
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            padding: 24px;
+            overflow-x: hidden;
         }
 
-        .app {
-            max-width: 900px;
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* ==========================================================================
+           APP CONTAINER
+           ========================================================================== */
+        .app-container {
+            max-width: 1000px;
             width: 100%;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 24px;
+            animation: fadeIn 0.8s var(--transition-curve);
         }
 
-        /* ===== TOP CONTAINER ===== */
+        /* ==========================================================================
+           TOP ROW / GLASSMOPHIC HEADER
+           ========================================================================== */
         .top-row {
-            display: flex;
-            gap: 10px;
             width: 100%;
-            align-items: stretch;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 16px 24px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
-        /* ===== BACK BUTTON ===== */
-        .back-btn {
+        .back-btn-square {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text);
-            text-decoration: none;
-            font-family: var(--mono);
-            font-size: 18px;
-            font-weight: 700;
-            padding: 0 18px;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
-            cursor: pointer;
-        }
-        .back-btn:hover {
-            background: #1a1a1a;
-            border-color: var(--border-light);
-            color: #fff;
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            border: 1px solid var(--border);
-            background: var(--surface);
-            padding: 18px 22px;
-            text-align: center;
-            flex: 1; /* Fills remaining space next to the back button */
-        }
-        .header-title {
-            font-weight: 700;
-            font-size: 22px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #fff;
-        }
-        .header-title span {
-            font-weight: 300;
-            color: var(--text-dim);
-        }
-        .header-sub {
-            font-size: 12px;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            margin-top: 4px;
-            font-family: var(--mono);
-        }
-
-        .section-heading {
-            font-family: var(--mono);
-            font-size: 13px;
-            font-weight: 400;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            margin-bottom: 16px;
-        }
-
-        .tool-grid {
-            display: grid;
-            gap: 16px;
-        }
-        .tool-grid.two-col {
-            grid-template-columns: 1fr 1fr;
-        }
-        .tool-grid.three-col {
-            grid-template-columns: repeat(3, 1fr);
-        }
-
-        .tool-card {
-            border: 1px solid var(--border);
-            background: var(--surface);
-            padding: 28px 16px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            transition: border-color 0.2s, background 0.2s;
-            text-decoration: none;
-            color: inherit;
-        }
-        .tool-card:hover {
-            border-color: var(--border-light);
-            background: #111111;
-        }
-        .tool-card .icon {
-            font-size: 40px;
-            line-height: 1;
-        }
-        .tool-card h2 {
-            font-family: var(--mono);
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .tool-card p {
-            font-family: var(--font);
-            font-size: 13px;
-            color: var(--text-dim);
-            line-height: 1.4;
-        }
-        .tool-card .arrow {
-            color: var(--text-dim);
             font-size: 16px;
-            font-family: var(--mono);
-            margin-top: 2px;
-            transition: color 0.2s;
-        }
-        .tool-card:hover .arrow {
-            color: #fff;
+            transition: all 0.3s var(--transition-curve);
+            cursor: pointer;
+            text-decoration: none;
         }
 
-        /* resource cards (from resourceHub) */
-        .resource-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 14px;
-            margin-bottom: 12px;
+        .back-btn-square:hover {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            transform: scale(1.05);
         }
-        .resource-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 18px 16px;
+
+        .app-header-title {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            transition: 0.2s;
-            text-decoration: none;
-            color: var(--text);
-            min-height: 120px;
-        }
-        .resource-card:hover {
-            border-color: var(--accent);
-            background: #111;
-        }
-        .resource-card .r-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: var(--accent);
-        }
-        .resource-card .r-name {
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-        .resource-card .r-desc {
-            font-size: 12px;
-            color: var(--text-dim);
-            line-height: 1.3;
+            align-items: center;
+            gap: 16px;
             flex: 1;
         }
-        .resource-card .r-badge {
-            margin-top: 8px;
-            font-size: 9px;
-            text-transform: uppercase;
-            font-weight: 700;
-            padding: 2px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-        }
-        .r-badge.official { color: var(--accent); border-color: var(--accent); }
-        .r-badge.tool { color: #81c784; border-color: #81c784; }
-        .r-badge.community { color: #4fc3f7; border-color: #4fc3f7; }
 
-        .sub-head {
-            font-family: var(--mono);
-            font-size: 12px;
-            color: var(--text-dim);
-            letter-spacing: 1px;
-            margin: 16px 0 8px 0;
+        .app-header-title i {
+            color: var(--text-primary);
+            font-size: 24px;
+        }
+
+        .app-header-title h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
+        .app-header-title h1 span {
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .app-header-title .sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border-left: 1px solid var(--border-color);
+            padding-left: 16px;
+            margin-left: auto;
+        }
+
+        /* ==========================================================================
+           SECTIONS & SUB-HEADINGS
+           ========================================================================== */
+        .section-heading {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 12px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .sub-head {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin: 28px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .sub-head::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: var(--border);
+            background: rgba(255, 255, 255, 0.05);
         }
 
+        /* ==========================================================================
+           MODERN GRID & DIAL CARDS (Spotlight Hover)
+           ========================================================================== */
+        .dial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .dial-card {
+            position: relative;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            height: 190px;
+            justify-content: space-between;
+            transition: all 0.4s var(--transition-curve);
+            text-decoration: none;
+            color: var(--text-primary);
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            border-radius: var(--tile-radius);
+        }
+
+        /* Dynamic mouse spotlight hover asset */
+        .dial-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255,255,255,0.04), transparent 40%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .dial-card:hover::before {
+            opacity: 1;
+        }
+
+        .dial-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .dial-card .icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            transition: all 0.4s var(--transition-curve);
+            z-index: 2;
+        }
+
+        .dial-card:hover .icon-wrap {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .dial-card .card-info-box {
+            z-index: 2;
+            width: 100%;
+        }
+
+        .dial-card .card-title {
+            font-weight: 500;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            margin-bottom: 6px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dial-card .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            font-weight: 300;
+        }
+
+        .dial-card .badge-and-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .dial-card .l-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .l-badge.official {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .l-badge.tool {
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .l-badge.community {
+            color: var(--text-secondary);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .dial-card .external-icon {
+            font-size: 11px;
+            color: var(--text-secondary);
+            transition: all 0.4s var(--transition-curve);
+        }
+
+        .dial-card:hover .external-icon {
+            color: #ffffff;
+            transform: translate(2px, -2px);
+        }
+
+        /* Footer styling */
         .footer-note {
             text-align: center;
-            font-size: 11px;
-            color: var(--text-muted);
-            font-family: var(--mono);
-            border-top: 1px solid var(--border);
-            padding-top: 16px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+            margin-top: 24px;
+            font-weight: 300;
         }
 
+        /* ==========================================================================
+           ANIMATIONS
+           ========================================================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==========================================================================
+           RESPONSIVE DESIGN
+           ========================================================================== */
         @media (max-width: 700px) {
-            .tool-grid.two-col { grid-template-columns: 1fr; }
-            .tool-grid.three-col { grid-template-columns: 1fr; }
-            .header-title { font-size: 18px; }
+            body {
+                padding: 16px;
+            }
+            .app-header-title .sub {
+                display: none;
+            }
+            .app-header-title h1 {
+                font-size: 1.1rem;
+            }
+            .dial-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-row {
+                padding: 12px 16px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app-container">
 
-    <!-- TOP NAVIGATION ROW -->
+    <!-- Premium Header -->
     <div class="top-row">
-        <!-- BACK BUTTON TO HOME ROOT -->
-        <a href="/index.html" class="back-btn" title="Back to Homepage">←</a>
-
-        <!-- HEADER -->
-        <header class="header">
-            <div class="header-title">TARKOV <span>INDEX</span></div>
-            <div class="header-sub">core tools · resources</div>
-        </header>
+        <!-- Back Button pointing back to root index -->
+        <a href="/index.html" class="back-btn-square" title="Back to Homepage">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="app-header-title">
+            <i class="fas fa-crosshairs"></i>
+            <h1>Tarkov <span>Index</span></h1>
+            <span class="sub">Tactical Intelligence</span>
+        </div>
     </div>
 
+    <!-- Primary Interactive Tools Section -->
     <section>
-        <div class="section-heading">⚙️ Primary Tools</div>
-        <div class="tool-grid three-col">
-            <a href="/EscapeFromTarkov/LoadoutGenerator/eftRndLdtGenV02.html" class="tool-card">
-                <div class="icon">⚔️</div>
-                <h2>LOADOUT GENERATOR</h2>
-                <p>Random weapon &amp; armor builds with flea market pricing.</p>
-                <div class="arrow">⏎</div>
+        <div class="section-heading"><i class="fas fa-sliders"></i> Primary Tools</div>
+        <div class="dial-grid">
+            <a href="/EscapeFromTarkov/LoadoutGenerator/eftRndLdtGenV02.html" class="dial-card">
+                <div class="icon-wrap">⚔️</div>
+                <div class="card-info-box">
+                    <div class="card-title">Loadout Generator</div>
+                    <div class="card-desc">Random weapon &amp; armor builds with flea market pricing indexes.</div>
+                </div>
+                <div class="badge-and-arrow">
+                    <span class="l-badge tool">Build Utility</span>
+                    <span class="external-icon"><i class="fas fa-arrow-trend-up"></i></span>
+                </div>
             </a>
-            <a href="/EscapeFromTarkov/Trivia/eftTriviaV02.html" class="tool-card">
-                <div class="icon">🧠</div>
-                <h2>TRIVIA</h2>
-                <p>Test your knowledge on items, calibers, prices &amp; traders.</p>
-                <div class="arrow">⏎</div>
+            
+            <a href="/EscapeFromTarkov/Trivia/eftTriviaV02.html" class="dial-card">
+                <div class="icon-wrap">🧠</div>
+                <div class="card-info-box">
+                    <div class="card-title">Trivia Challenge</div>
+                    <div class="card-desc">Test your operational knowledge on items, calibers, prices &amp; traders.</div>
+                </div>
+                <div class="badge-and-arrow">
+                    <span class="l-badge tool">Intel Test</span>
+                    <span class="external-icon"><i class="fas fa-arrow-trend-up"></i></span>
+                </div>
             </a>
-            <a href="/EscapeFromTarkov/Wordle/eftWordleV01.html" class="tool-card">
-                <div class="icon">🟩</div>
-                <h2>WORDLE</h2>
-                <p>Guess the Tarkov-related item or term in six tries.</p>
-                <div class="arrow">⏎</div>
+            
+            <a href="/EscapeFromTarkov/Wordle/eftWordleV01.html" class="dial-card">
+                <div class="icon-wrap">🟩</div>
+                <div class="card-info-box">
+                    <div class="card-title">Tarkov Wordle</div>
+                    <div class="card-desc">Identify the correct Tarkov-related item or terminology within six attempts.</div>
+                </div>
+                <div class="badge-and-arrow">
+                    <span class="l-badge tool">Recon Game</span>
+                    <span class="external-icon"><i class="fas fa-arrow-trend-up"></i></span>
+                </div>
             </a>
         </div>
     </section>
 
+    <!-- Tarkov External Database & Resources Section -->
     <section>
-        <div class="section-heading">🗺️ Tarkov Resources</div>
+        <div class="section-heading"><i class="fas fa-bookmark"></i> Tarkov Resources</div>
 
-        <div class="sub-head"><i class="fas fa-bookmark"></i> Official Channels</div>
-        <div class="resource-grid" id="tarkovOfficialGrid">
-            </div>
+        <div class="sub-head"><i class="fas fa-circle-nodes"></i> Official Channels</div>
+        <div class="dial-grid" id="tarkovOfficialGrid"></div>
 
         <div class="sub-head"><i class="fas fa-database"></i> Tools &amp; Databases</div>
-        <div class="resource-grid" id="tarkovToolsGrid">
-            </div>
+        <div class="dial-grid" id="tarkovToolsGrid"></div>
 
         <div class="sub-head"><i class="fas fa-users"></i> Community Hubs</div>
-        <div class="resource-grid" id="tarkovCommunityGrid">
-            </div>
+        <div class="dial-grid" id="tarkovCommunityGrid"></div>
     </section>
 
+    <!-- Tactical Footer -->
     <div class="footer-note">navigate · prepare · survive</div>
 
 </div>
 
 <script>
-    // ---- DATA (copied from resourceHubV01) ----
+    // ---- TARKOV INDEX DATA ----
     const tarkovOfficial = [
-        { name: 'Battlestate Games', desc: 'Official website & launcher developer', icon: 'fas fa-globe', url: 'https://www.battlestategames.com/', badge: 'official' },
-        { name: 'Escape from Tarkov', desc: 'Official game registration & pre-order portal', icon: 'fas fa-gamepad', url: 'https://www.escapefromtarkov.com/', badge: 'official' },
-        { name: 'Instagram feed', desc: 'Visual gameplay capture & art briefs', icon: 'fab fa-instagram', url: 'https://www.instagram.com/escapefromtarkov/', badge: 'official' },
-        { name: 'Twitch Channel', desc: 'Official Battlestate stream broadcasts', icon: 'fab fa-twitch', url: 'https://www.twitch.tv/battlestategames', badge: 'official' },
-        { name: 'Twitter · BSG', desc: 'Latest studio updates and micro-blogs', icon: 'fab fa-twitter', url: 'https://twitter.com/bstategames', badge: 'official' },
-        { name: 'Twitter · Nikita', desc: 'Dev status status blogs from direct sources', icon: 'fab fa-twitter', url: 'https://twitter.com/nikgeneburn', badge: 'official' },
-        { name: 'YouTube Channel', desc: 'Official trailers, podcasts, and video briefs', icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/BattlestateGames', badge: 'official' }
+        { name: 'Battlestate Games', desc: 'Official website & launcher developer portal', icon: 'fas fa-globe', url: 'https://www.battlestategames.com/', badge: 'official' },
+        { name: 'Escape from Tarkov', desc: 'Official game registration & pre-order terminal', icon: 'fas fa-gamepad', url: 'https://www.escapefromtarkov.com/', badge: 'official' },
+        { name: 'Instagram Feed', desc: 'Visual gameplay capture & art briefs from development', icon: 'fab fa-instagram', url: 'https://www.instagram.com/escapefromtarkov/', badge: 'official' },
+        { name: 'Twitch Channel', desc: 'Official Battlestate stream broadcasts and events', icon: 'fab fa-twitch', url: 'https://www.twitch.tv/battlestategames', badge: 'official' },
+        { name: 'Twitter · BSG', desc: 'Latest studio updates and official micro-blogs', icon: 'fab fa-twitter', url: 'https://twitter.com/bstategames', badge: 'official' },
+        { name: 'Twitter · Nikita', desc: 'Developer update blogs directly from the source', icon: 'fab fa-twitter', url: 'https://twitter.com/nikgeneburn', badge: 'official' },
+        { name: 'YouTube Channel', desc: 'Official trailers, podcasts, and video showcases', icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/BattlestateGames', badge: 'official' }
     ];
 
     const tarkovTools = [
         { name: 'EFT MapGenie', desc: 'Comprehensive interactive coordinate sector map overlays', icon: 'fas fa-map', url: 'https://mapgenie.io/tarkov', badge: 'tool' },
-        { name: 'Tarkov Armory', desc: 'In-depth plate protective coverage & damage metrics', icon: 'fas fa-shield-alt', url: 'https://tarkov-armory.com/', badge: 'tool' },
+        { name: 'Tarkov Armory', desc: 'In-depth plate protective coverage & armor metrics', icon: 'fas fa-shield-alt', url: 'https://tarkov-armory.com/', badge: 'tool' },
         { name: 'Tarkov Ballistics', desc: 'Advanced terminal ballistics charts & round comparisons', icon: 'fas fa-crosshairs', url: 'https://tarkov-ballistics.com/', badge: 'tool' },
         { name: 'Tarkov Database', desc: 'Item structural stat catalog lookup utility', icon: 'fas fa-book', url: 'https://tarkovdb.com/', badge: 'tool' },
-        { name: 'Tarkov Gunsmith', desc: 'Simulate customized gun structures & recoil builds', icon: 'fas fa-crosshairs', url: 'https://tarkov-gunsmith.com/', badge: 'tool' },
+        { name: 'Tarkov Gunsmith', desc: 'Simulate customized gun structures & recoil builds', icon: 'fas fa-gun', url: 'https://tarkov-gunsmith.com/', badge: 'tool' },
         { name: 'Tarkov Hideout Calc', desc: 'Resource calculators for customized hideout installations', icon: 'fas fa-home', url: 'https://tarkov-hideout.com/', badge: 'tool' },
         { name: 'Tarkov Market', desc: 'Real-time flea market indices & price graphs', icon: 'fas fa-chart-line', url: 'https://tarkov-market.com/', badge: 'tool' },
-        { name: 'Tarkov Questie', desc: 'Interactive visual quest assistance & tree roadmap', icon: 'fas fa-tasks', url: 'https://tarkovquestie.com/', badge: 'tool' },
+        { name: 'Tarkov Questie', desc: 'Interactive visual quest assistance & tree roadmaps', icon: 'fas fa-tasks', url: 'https://tarkovquestie.com/', badge: 'tool' },
         { name: 'Tarkov Tools', desc: 'Assorted interactive utility graphs for tactical analysts', icon: 'fas fa-wrench', url: 'https://tarkov-tools.com/', badge: 'tool' },
-        { name: 'Tarkov Tracker', desc: 'Structured progress tracker for quest-lines', icon: 'fas fa-map-marker-alt', url: 'https://tarkovtracker.io/', badge: 'tool' },
+        { name: 'Tarkov Tracker', desc: 'Structured progression tracking for active quest-lines', icon: 'fas fa-map-marker-alt', url: 'https://tarkovtracker.io/', badge: 'tool' },
         { name: 'Tarkov.dev', desc: 'Extensive database covering ammo, hideouts, & items', icon: 'fas fa-database', url: 'https://tarkov.dev/', badge: 'tool' }
     ];
 
     const tarkovCommunity = [
-        { name: 'Discord server', desc: 'Official BSG community voice server', icon: 'fab fa-discord', url: 'https://discord.gg/escapefromtarkov', badge: 'official' },
+        { name: 'Discord Server', desc: 'Official Battlestate community voice and coordination servers', icon: 'fab fa-discord', url: 'https://discord.gg/escapefromtarkov', badge: 'official' },
         { name: 'Reddit Hub', desc: 'Community board for discussions on r/EscapeFromTarkov', icon: 'fab fa-reddit', url: 'https://www.reddit.com/r/EscapefromTarkov/', badge: 'community' },
         { name: 'Tarkov Fandom Wiki', desc: 'Complete encyclopedia of lore, gear parameters, & mechanics', icon: 'fab fa-wikipedia-w', url: 'https://escapefromtarkov.fandom.com/', badge: 'community' }
     ];
 
+    /* ==========================================================================
+       CARD RENDER & SPOTLIGHT INTERACTIONS
+       ========================================================================== */
     function renderResources(data, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = data.map(item => `
-            <a href="${item.url}" target="_blank" class="resource-card">
-                <div class="r-icon"><i class="${item.icon}"></i></div>
-                <div class="r-name">${item.name}</div>
-                <div class="r-desc">${item.desc}</div>
-                <span class="r-badge ${item.badge}">${item.badge}</span>
+            <a href="${item.url}" target="_blank" class="dial-card">
+                <div class="icon-wrap"><i class="${item.icon}"></i></div>
+                <div class="card-info-box">
+                    <div class="card-title">${item.name}</div>
+                    <div class="card-desc">${item.desc}</div>
+                </div>
+                <div class="badge-and-arrow">
+                    <span class="l-badge ${item.badge}">${item.badge}</span>
+                    <span class="external-icon"><i class="fas fa-arrow-trend-up"></i></span>
+                </div>
             </a>
         `).join('');
     }
 
+    // Dynamic mouse-tracking spotlight backlights
+    function initSpotlightEffect() {
+        const cards = document.querySelectorAll('.dial-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    }
+
+    /* ==========================================================================
+       INITIALIZATION
+       ========================================================================== */
     document.addEventListener('DOMContentLoaded', () => {
         renderResources(tarkovOfficial, 'tarkovOfficialGrid');
         renderResources(tarkovTools, 'tarkovToolsGrid');
         renderResources(tarkovCommunity, 'tarkovCommunityGrid');
+        
+        // Start interactive spotlight updates
+        initSpotlightEffect();
     });
 </script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
 </body>
 </html>

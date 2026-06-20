@@ -5,27 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>General Resource Hub</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ==========================================================================
-       THEME & GLOBAL VARIABLES
+       THEME & GLOBAL VARIABLES (Matching index.html)
        ========================================================================== */
     :root {
-      --app-bg: #0a0a0a;
-      --panel-bg: #111;
-      --panel-border: #2a2a2a;
-      --header-bg: #1a1a1a;
-      --header-text: #f0f0f0;
-      --accent: #ca8a04;
-      --accent-hover: #e0a010;
-      --text-primary: #d4d4d4;
-      --text-secondary: #888;
-      --tile-bg: #222;
-      --tile-border: #333;
-      --tile-hover: #2a2a2a;
-      --border-radius: 12px;
-      --tile-radius: 8px;
-      --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --bg-color: #030303;
+      --surface-color: rgba(18, 18, 18, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.2);
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --tile-bg: rgba(18, 18, 18, 0.4);
+      --tile-border: rgba(255, 255, 255, 0.08);
+      --tile-hover: rgba(255, 255, 255, 0.03);
+      --border-radius: 16px;
+      --tile-radius: 12px;
+      --transition-curve: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -35,15 +32,21 @@
     }
 
     body {
-      background: var(--app-bg);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
       color: var(--text-primary);
-      font-family: var(--font-family);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 12px;
+      align-items: center;
+      padding: 24px;
+      overflow-x: hidden;
     }
 
+    /* Scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -52,7 +55,7 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--panel-border);
+      background: var(--border-color);
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
@@ -63,190 +66,219 @@
        APP CONTAINER
        ========================================================================== */
     .app-container {
-      max-width: 1400px;
-      margin: 0 auto;
+      max-width: 1000px;
       width: 100%;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 24px;
+      animation: fadeIn 0.8s var(--transition-curve);
     }
 
     /* ==========================================================================
-       TOP ROW / HEADER
+       TOP ROW / GLASSMOPHIC HEADER
        ========================================================================== */
     .top-row {
       width: 100%;
-      flex-shrink: 0;
       display: flex;
-      gap: 8px;
-      align-items: stretch;
+      gap: 16px;
+      align-items: center;
+      background: var(--surface-color);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      padding: 16px 24px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
     .back-btn-square {
-      background: var(--header-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--border-radius);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
       color: var(--text-primary);
-      width: 54px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      font-size: 16px;
+      transition: all 0.3s var(--transition-curve);
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      flex-shrink: 0;
       text-decoration: none;
     }
+
     .back-btn-square:hover {
-      background: var(--tile-hover);
-      color: var(--accent);
-      border-color: var(--accent);
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+      transform: scale(1.05);
     }
 
     .app-header-title {
-      flex: 1;
-      background: var(--header-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--border-radius);
-      padding: 12px 24px;
       display: flex;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      flex: 1;
     }
+
     .app-header-title i {
-      color: var(--accent);
-      font-size: 28px;
+      color: var(--text-primary);
+      font-size: 24px;
     }
+
     .app-header-title h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: 22px;
-      letter-spacing: 1.5px;
-      color: var(--header-text);
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       margin: 0;
     }
+
     .app-header-title h1 span {
-      color: var(--accent);
-    }
-    .app-header-title .sub {
-      font-size: 13px;
       color: var(--text-secondary);
-      font-weight: 400;
-      letter-spacing: 0.8px;
-      margin-left: auto;
-      font-family: 'Rajdhani', sans-serif;
+      font-weight: 300;
+    }
+
+    .app-header-title .sub {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      border-left: 2px solid var(--panel-border);
+      border-left: 1px solid var(--border-color);
       padding-left: 16px;
+      margin-left: auto;
     }
 
     /* ==========================================================================
-       LINKS / RESOURCE HUB STYLES
+       LINKS WRAPPER & SECTIONS
        ========================================================================== */
     .links-wrapper {
-      padding: 8px 16px 24px 16px;
-      overflow-y: auto;
-      flex: 1;
-      display: block;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-radius: var(--border-radius);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .section-title {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin: 16px 0 8px 0;
-      padding: 12px 18px;
-      background: var(--header-bg);
-      border: 1px solid var(--panel-border);
+      gap: 16px;
+      padding: 20px 24px;
+      background: var(--surface-color);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
       border-radius: var(--tile-radius);
       cursor: pointer;
-      transition: 0.15s;
+      transition: all 0.4s var(--transition-curve);
       user-select: none;
     }
-    .section-title:first-child {
-      margin-top: 0;
-    }
+
     .section-title:hover {
-      border-color: var(--accent);
-      background: var(--tile-hover);
+      border-color: var(--border-hover);
+      background: rgba(255, 255, 255, 0.02);
     }
+
+    .section-title i:first-child {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+
     .section-title h2 {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 15px;
-      letter-spacing: 1.2px;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--header-text);
+      color: var(--text-primary);
       flex: 1;
     }
+
     .section-title .count {
-      font-size: 11px;
+      font-size: 0.75rem;
+      font-weight: 600;
       color: var(--text-secondary);
-      background: var(--tile-bg);
+      background: rgba(255, 255, 255, 0.05);
       padding: 2px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--panel-border);
+      border-radius: 9999px;
+      border: 1px solid var(--border-color);
       margin-right: 8px;
     }
+
     .section-title .chevron {
       color: var(--text-secondary);
-      transition: transform 0.25s ease;
-      font-size: 14px;
+      transition: transform 0.4s var(--transition-curve);
+      font-size: 12px;
     }
+
     .section-title .chevron.collapsed {
       transform: rotate(-90deg);
     }
 
     .section-body {
       overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
-      max-height: 4000px;
+      transition: max-height 0.5s var(--transition-curve), opacity 0.4s ease;
+      max-height: 2000px;
       opacity: 1;
     }
+
     .section-body.collapsed {
       max-height: 0;
       opacity: 0;
-      margin: 0;
-      padding: 0;
+      pointer-events: none;
     }
 
+    /* ==========================================================================
+       MODERN DIAL CARDS (Spotlight Hover)
+       ========================================================================== */
     .dial-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-      padding-top: 6px;
-      padding-bottom: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding-top: 10px;
+      padding-bottom: 20px;
     }
 
     .dial-card {
-      background: var(--tile-bg);
-      border: 1px solid var(--tile-border);
-      border-radius: var(--tile-radius);
-      padding: 18px 16px;
+      position: relative;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      padding: 24px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      transition: 0.2s ease;
+      height: 190px;
+      justify-content: space-between;
+      transition: all 0.4s var(--transition-curve);
       text-decoration: none;
       color: var(--text-primary);
-      position: relative;
-      min-height: 140px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      border-radius: var(--tile-radius);
     }
+
+    /* Dynamic mouse spotlight hover asset */
+    .dial-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255,255,255,0.04), transparent 40%);
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .dial-card:hover::before {
+      opacity: 1;
+    }
+
     .dial-card:hover {
-      border-color: var(--accent);
-      background: var(--tile-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transform: translateY(-4px);
+      border-color: var(--border-hover);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
+
     .dial-card .icon-wrap {
       width: 44px;
       height: 44px;
@@ -254,95 +286,114 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      margin-bottom: 12px;
-      color: var(--accent);
-      transition: 0.15s;
+      font-size: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      transition: all 0.4s var(--transition-curve);
+      z-index: 2;
     }
+
     .dial-card:hover .icon-wrap {
-      background: var(--header-bg);
-      border-color: var(--accent);
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
+      transform: scale(1.05);
     }
+
+    .dial-card .card-info-box {
+      z-index: 2;
+      width: 100%;
+    }
+
     .dial-card .card-title {
-      font-weight: 700;
-      font-size: 15px;
-      margin-bottom: 4px;
-      color: var(--header-text);
+      font-weight: 500;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+      color: #ffffff;
     }
+
     .dial-card .card-desc {
-      font-size: 12px;
+      font-size: 0.8rem;
       color: var(--text-secondary);
-      line-height: 1.4;
-      flex: 1;
+      line-height: 1.5;
+      font-weight: 300;
     }
+
+    .dial-card .badge-and-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      z-index: 2;
+    }
+
     .dial-card .l-badge {
-      margin-top: 10px;
-      font-size: 9px;
+      font-size: 0.65rem;
       text-transform: uppercase;
-      font-weight: 700;
-      background: var(--panel-bg);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid var(--panel-border);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
     }
+
     .l-badge.utility {
-      color: #b39ddb;
-      border-color: #7e57c2;
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
     }
+
     .l-badge.reference {
-      color: #4fc3f7;
-      border-color: #4fc3f7;
+      color: var(--text-secondary);
+      border-color: rgba(255, 255, 255, 0.08);
     }
+
     .dial-card .external-icon {
-      position: absolute;
-      top: 12px;
-      right: 12px;
       font-size: 11px;
       color: var(--text-secondary);
-      opacity: 0.4;
-      transition: 0.15s;
+      transition: all 0.4s var(--transition-curve);
     }
+
     .dial-card:hover .external-icon {
-      opacity: 0.8;
-      color: var(--accent);
+      color: #ffffff;
+      transform: translate(2px, -2px);
     }
 
     /* ==========================================================================
-       RESPONSIVE
+       ANIMATIONS
+       ========================================================================== */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN
        ========================================================================== */
     @media (max-width: 700px) {
+      body {
+        padding: 16px;
+      }
       .app-header-title .sub {
         display: none;
       }
       .app-header-title h1 {
-        font-size: 16px;
+        font-size: 1.1rem;
       }
       .dial-grid {
         grid-template-columns: 1fr;
       }
       .top-row {
-        flex-wrap: wrap;
-      }
-      .back-btn-square {
-        width: 44px;
-        font-size: 14px;
-      }
-      .app-header-title {
-        padding: 10px 16px;
-      }
-      .app-header-title i {
-        font-size: 20px;
-      }
-      .links-wrapper {
-        padding: 8px 10px 16px 10px;
-      }
-      .section-title {
-        padding: 10px 14px;
-      }
-      .section-title h2 {
-        font-size: 13px;
+        padding: 12px 16px;
       }
     }
   </style>
@@ -351,6 +402,7 @@
 
   <div class="app-container">
 
+    <!-- Premium Header -->
     <div class="top-row">
       <a href="#" class="back-btn-square" onclick="window.history.back(); return false;" title="Go Back">
         <i class="fas fa-arrow-left"></i>
@@ -362,6 +414,7 @@
       </div>
     </div>
 
+    <!-- Collapsible Sections -->
     <div class="links-wrapper">
 
       <!-- TOOLS & UTILITIES -->
@@ -375,7 +428,7 @@
         <div class="dial-grid" id="toolsGrid"></div>
       </div>
 
-      <!-- IMPORTANT WEBSITES (replaces Content Creators) -->
+      <!-- IMPORTANT WEBSITES -->
       <div class="section-title" onclick="toggleSection('websitesBody', this)">
         <i class="fas fa-globe"></i>
         <h2>Important Websites</h2>
@@ -401,10 +454,8 @@
     }
 
     /* ==========================================================================
-       DATA & RENDER LOGIC
+       DATA SETS
        ========================================================================== */
-
-    // ---- TOOLS & UTILITIES ----
     const tools = [
       { name: 'AutoHotkey', desc: 'Macro execution & system automation script compiler', icon: 'fas fa-keyboard', url: 'https://www.autohotkey.com/', badge: 'utility' },
       { name: 'FPS Monitor', desc: 'Diagnostic hardware resource overlay displays', icon: 'fas fa-desktop', url: 'https://fpsmonitor.com/', badge: 'utility' },
@@ -417,7 +468,6 @@
       { name: 'VoiceAttack', desc: 'Control keyboard parameters using customized voice briefs', icon: 'fas fa-microphone', url: 'https://voiceattack.com/', badge: 'utility' }
     ];
 
-    // ---- IMPORTANT WEBSITES (new) ----
     const websites = [
       { name: 'Wikipedia', desc: 'Free online encyclopedia covering almost every topic.', icon: 'fab fa-wikipedia-w', url: 'https://www.wikipedia.org/', badge: 'reference' },
       { name: 'dict.leo', desc: 'German-English dictionary and translation tool.', icon: 'fas fa-language', url: 'https://www.leo.org/', badge: 'reference' },
@@ -429,22 +479,44 @@
       { name: 'Internet Archive', desc: 'Digital library of free books, movies, and web pages.', icon: 'fas fa-archive', url: 'https://archive.org/', badge: 'reference' }
     ];
 
-    // ---- RENDER HELPER ----
+    /* ==========================================================================
+       RENDER & INTERACTIVE SPOTLIGHT LOGIC
+       ========================================================================== */
     function renderCards(data, containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = data.map(item => `
         <a href="${item.url}" target="_blank" class="dial-card">
-          <span class="external-icon"><i class="fas fa-up-right-from-square"></i></span>
           <div class="icon-wrap"><i class="${item.icon}"></i></div>
-          <div class="card-title">${item.name}</div>
-          <div class="card-desc">${item.desc}</div>
-          <span class="l-badge ${item.badge}">${item.badge}</span>
+          <div class="card-info-box">
+            <div class="card-title">${item.name}</div>
+            <div class="card-desc">${item.desc}</div>
+          </div>
+          <div class="badge-and-arrow">
+            <span class="l-badge ${item.badge}">${item.badge}</span>
+            <span class="external-icon"><i class="fas fa-arrow-trend-up"></i></span>
+          </div>
         </a>
       `).join('');
     }
 
-    // ---- INIT ----
+    // Attach dynamic spotlight listeners to cards
+    function initSpotlightEffect() {
+      const cards = document.querySelectorAll('.dial-card');
+      cards.forEach(card => {
+        card.addEventListener('mousemove', e => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+        });
+      });
+    }
+
+    /* ==========================================================================
+       INITIALIZATION
+       ========================================================================== */
     function init() {
       // Render Tools
       renderCards(tools, 'toolsGrid');
@@ -453,10 +525,12 @@
       // Render Websites
       renderCards(websites, 'websitesGrid');
       document.getElementById('websitesCount').textContent = websites.length;
+
+      // Start spotlight interactive listener
+      initSpotlightEffect();
     }
 
     document.addEventListener('DOMContentLoaded', init);
   </script>
-
 </body>
 </html>
