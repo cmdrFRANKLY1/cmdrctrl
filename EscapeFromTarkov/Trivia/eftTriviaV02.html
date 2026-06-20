@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarkov Trivia · Multiple Choice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --border: #2a2a2a;
+            --border-light: #3a3a3a;
+            --text: #e8e8e8;
+            --text-dim: #777777;
+            --text-muted: #444444;
+            --correct: #4caf50;
+            --wrong: #f44336;
+            --gold: #ffd700;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono: Consolas, "Courier New", monospace;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app {
+            max-width: 850px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+        .header-title span {
+            font-weight: 300;
+            color: var(--text-dim);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-score {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 4px 16px;
+            background: var(--bg);
+        }
+        .header-score .score-value {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .header-lives {
+            font-family: var(--mono);
+            font-size: 16px;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 4px 16px;
+            background: var(--bg);
+            letter-spacing: 2px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .debug-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-dim);
+            font-family: var(--mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .debug-toggle input[type="checkbox"] {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .debug-toggle input[type="checkbox"]:checked {
+            background: var(--border-light);
+            border-color: var(--text-dim);
+        }
+        .debug-toggle input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 11px;
+            position: absolute;
+            top: -2px;
+            left: 1px;
+        }
+        .debug-toggle input[type="checkbox"]:hover {
+            border-color: var(--text-dim);
+        }
+
+        .header-status {
+            font-size: 11px;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            padding: 4px 14px;
+            font-family: var(--mono);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-status .dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            transition: background 0.2s;
+        }
+        .header-status .dot.loading {
+            background: #aaaaaa;
+            animation: blink 0.9s step-end infinite;
+        }
+        .header-status .dot.ready {
+            background: #ffffff;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .quiz-area {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            min-height: 420px;
+            position: relative;
+        }
+
+        .shuffle-start {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 20px;
+            width: 100%;
+            min-height: 300px;
+        }
+        .shuffle-start .shuffle-icon {
+            font-size: 72px;
+            color: var(--text-dim);
+            animation: shuffle-bounce 2s ease-in-out infinite;
+        }
+        @keyframes shuffle-bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(15deg); }
+        }
+        .shuffle-start .shuffle-title {
+            font-family: var(--mono);
+            font-size: 18px;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            min-height: 30px;
+        }
+        .shuffle-start .shuffle-sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            min-height: 20px;
+        }
+        .shuffle-start .btn-shuffle {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: #fff;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px 48px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            background: var(--bg);
+            margin-top: 8px;
+            display: none;
+        }
+        .shuffle-start .btn-shuffle:hover:not(:disabled) {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+            transform: scale(1.02);
+        }
+        .shuffle-start .btn-shuffle:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .shuffle-start .btn-shuffle:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .question-display {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+        .question-display.active {
+            display: flex;
+        }
+
+        .question-title {
+            font-family: var(--mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            min-height: 22px;
+            padding: 0 8px;
+        }
+
+        .icon-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .icon-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .icon-box {
+            width: 140px;
+            height: 140px;
+            background: var(--bg);
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: border-color 0.4s, box-shadow 0.4s, transform 0.3s;
+            position: relative;
+        }
+        .icon-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: grayscale(1) brightness(1.2);
+            transition: filter 0.3s;
+        }
+        .icon-box img:hover {
+            filter: grayscale(0.2) brightness(1.3);
+        }
+        .icon-box .placeholder {
+            color: var(--text-muted);
+            font-size: 48px;
+            font-family: var(--mono);
+        }
+
+        .icon-box a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .icon-box.shuffling {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15), inset 0 0 30px rgba(255, 215, 0, 0.05);
+            animation: case-pulse 0.3s ease-in-out infinite alternate;
+        }
+        @keyframes case-pulse {
+            0% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.1), inset 0 0 20px rgba(255, 215, 0, 0.03);
+                transform: scale(1);
+            }
+            100% {
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.25), inset 0 0 40px rgba(255, 215, 0, 0.08);
+                transform: scale(1.02);
+            }
+        }
+        .icon-box.shuffling-fast { animation-duration: 0.08s; }
+        .icon-box.shuffling-medium { animation-duration: 0.2s; }
+        .icon-box.shuffling-slow { animation-duration: 0.4s; }
+
+        .icon-box.reveal {
+            border-color: #ffffff;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+            animation: reveal-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes reveal-pop {
+            0% { transform: scale(0.92); border-color: var(--gold); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); border-color: var(--border); }
+        }
+
+        .icon-box.correct {
+            border-color: var(--correct);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.2);
+        }
+        .icon-box.wrong {
+            border-color: var(--wrong);
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.2);
+        }
+
+        .icon-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 14px;
+        }
+        .icon-label.shuffling-label {
+            color: var(--gold);
+        }
+
+        .category-selection {
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 650px;
+        }
+        .category-selection.visible {
+            display: flex;
+        }
+
+        .cat-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.1s;
+            text-align: center;
+            min-width: 120px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cat-btn:hover:not(:disabled) {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+        }
+        .cat-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .cat-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .cat-btn .cat-points {
+            font-weight: 400;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            max-width: 650px;
+            transition: opacity 0.4s ease;
+        }
+        .options-grid.hidden {
+            display: none;
+        }
+
+        .option-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.1s;
+            text-align: left;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        .option-btn .option-text {
+            flex: 1;
+        }
+        .option-btn .option-wiki {
+            color: var(--text-dim);
+            font-size: 15px;
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+            padding: 0 4px;
+            font-weight: 700;
+        }
+        .option-btn .option-wiki:hover {
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+        }
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-btn.selected-correct {
+            border-color: var(--correct);
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--correct);
+        }
+        .option-btn.selected-wrong {
+            border-color: var(--wrong);
+            background: rgba(244, 67, 54, 0.15);
+            color: var(--wrong);
+        }
+        .option-btn.show-correct {
+            border-color: var(--correct);
+            background: rgba(76, 175, 80, 0.08);
+        }
+
+        .feedback-area {
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 16px;
+            font-weight: 700;
+            gap: 12px;
+            text-align: center;
+            flex-wrap: wrap;
+        }
+        .feedback-area .correct-text {
+            color: var(--correct);
+        }
+        .feedback-area .wrong-text {
+            color: var(--wrong);
+        }
+        .feedback-area .sub-text {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-dim);
+        }
+        .feedback-area .shuffle-hint {
+            color: var(--gold);
+            animation: pulse-text 0.6s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-text {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--text-dim);
+            font-family: var(--mono);
+            font-size: 13px;
+            grid-column: 1 / -1;
+        }
+        .empty-state .big {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+        }
+        .empty-state .sub {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+        .empty-state button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 20px;
+            font-family: var(--mono);
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        .empty-state button:hover {
+            border-color: var(--text-dim);
+        }
+
+        @media (max-width: 640px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .option-btn {
+                font-size: 13px;
+                padding: 10px 12px;
+                min-height: 48px;
+            }
+            .icon-box {
+                width: 110px;
+                height: 110px;
+            }
+            .quiz-area {
+                padding: 20px 12px;
+                min-height: 380px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .header-score {
+                font-size: 14px;
+            }
+            .header-lives {
+                font-size: 14px;
+            }
+            .question-title {
+                font-size: 12px;
+            }
+            .shuffle-start .shuffle-icon {
+                font-size: 56px;
+            }
+            .shuffle-start .btn-shuffle {
+                padding: 12px 32px;
+                font-size: 12px;
+            }
+            .cat-btn {
+                font-size: 12px;
+                padding: 12px 16px;
+                min-width: 80px;
+            }
+        }
+        @media (max-width: 400px) {
+            .icon-box {
+                width: 90px;
+                height: 90px;
+            }
+            .option-btn {
+                font-size: 12px;
+                padding: 8px 10px;
+                min-height: 40px;
+            }
+            .feedback-area {
+                font-size: 14px;
+            }
+            .question-title {
+                font-size: 11px;
+            }
+            .cat-btn {
+                font-size: 11px;
+                padding: 10px 12px;
+                min-width: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <header class="header">
+            <div>
+                <div class="header-title">TARKOV <span>TRIVIA</span></div>
+                <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);letter-spacing:0.5px;">multi‑category quiz</div>
+            </div>
+            <div class="header-right">
+                <div class="header-score">
+                    score: <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="header-lives" id="livesDisplay">❤️❤️❤️</div>
+                <label class="debug-toggle">
+                    <input type="checkbox" id="debugToggle" />
+                    debug
+                </label>
+                <div class="header-status">
+                    <span class="dot" id="statusDot"></span>
+                    <span id="statusText">initializing ...</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="quiz-area" id="quizArea">
+            <!-- Shuffle Start Screen -->
+            <div class="shuffle-start" id="shuffleStart">
+                <div class="shuffle-icon" id="startIcon">🎲</div>
+                <div class="shuffle-title" id="startTitle">READY TO PLAY</div>
+                <div class="shuffle-sub" id="startSub">5 question types · 10 points each</div>
+                <button class="btn-shuffle" id="shuffleBtn">[ shuffle ]</button>
+            </div>
+
+            <!-- Question Display -->
+            <div class="question-display" id="questionDisplay">
+                <div class="question-title" id="questionTitle">What is this item?</div>
+
+                <div class="icon-display">
+                    <div class="icon-wrapper">
+                        <div class="icon-box" id="iconBox">
+                            <span class="placeholder">␣</span>
+                        </div>
+                    </div>
+                    <div class="icon-label" id="iconLabel"></div>
+                </div>
+
+                <!-- Category Selection (for items) -->
+                <div class="category-selection" id="categorySelection"></div>
+
+                <!-- Options Grid -->
+                <div class="options-grid hidden" id="optionsGrid">
+                    <div class="empty-state">
+                        <span class="big">␣</span>
+                        loading ...
+                    </div>
+                </div>
+
+                <div class="feedback-area" id="feedbackArea"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  TARKOV TRIVIA · ITEM CATEGORIES (Name, Caliber, Price)
+        // ================================================================
+        const TriviaApp = {
+            API_URL: 'https://api.tarkov.dev/graphql',
+
+            allItems: [],
+            completeWeapons: [],
+            allTraders: [],
+
+            currentQuestion: null,
+            score: 0,
+            lives: 3,
+            gameOver: false,
+            isAnswered: false,
+            isLoading: false,
+            isShuffling: false,
+            debugMode: false,
+            shuffleTimeout: null,
+            advanceTimeout: null,
+            countdownTimeout: null,
+
+            // ---- DOM refs ----
+            el: {
+                shuffleStart: document.getElementById('shuffleStart'),
+                questionDisplay: document.getElementById('questionDisplay'),
+                shuffleBtn: document.getElementById('shuffleBtn'),
+                startIcon: document.getElementById('startIcon'),
+                startTitle: document.getElementById('startTitle'),
+                startSub: document.getElementById('startSub'),
+                questionTitle: document.getElementById('questionTitle'),
+                iconBox: document.getElementById('iconBox'),
+                iconLabel: document.getElementById('iconLabel'),
+                categorySelection: document.getElementById('categorySelection'),
+                optionsGrid: document.getElementById('optionsGrid'),
+                feedbackArea: document.getElementById('feedbackArea'),
+                scoreDisplay: document.getElementById('scoreDisplay'),
+                livesDisplay: document.getElementById('livesDisplay'),
+                statusText: document.getElementById('statusText'),
+                statusDot: document.getElementById('statusDot'),
+                debugToggle: document.getElementById('debugToggle'),
+            },
+
+            // ---- fetch data ----
+            fetchAllData: async function() {
+                const q = `
+              query {
+                items(lang: en) {
+                  id
+                  name
+                  shortName
+                  iconLink
+                  wikiLink
+                  basePrice
+                  avg24hPrice
+                  types
+                  category { id name }
+                  properties {
+                    __typename
+                    ... on ItemPropertiesWeapon {
+                      caliber
+                    }
+                  }
+                }
+                traders {
+                  id
+                  name
+                  imageLink
+                }
+              }
+            `;
+                const r = await fetch(this.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: q })
+                });
+                const j = await r.json();
+                if (j.errors) throw new Error(j.errors[0].message);
+                return j.data;
+            },
+
+            // ---- filter complete weapons (no mods, no parts) ----
+            isCompleteWeapon: function(item) {
+                const types = item.types || [];
+                const cat = (item.category?.name || '').toLowerCase();
+                const name = (item.name || '').toLowerCase();
+
+                const isGun = types.includes('weapon') || types.includes('gun') ||
+                              cat.includes('gun') || cat.includes('firearm') ||
+                              cat.includes('pistol') || cat.includes('rifle') ||
+                              cat.includes('shotgun') || cat.includes('sniper') ||
+                              cat.includes('smg') || cat.includes('machine gun');
+                if (!isGun) return false;
+
+                const badTypes = ['modification', 'mods', 'barrel', 'stock', 'pistolGrip',
+                    'handguard', 'muzzle', 'sight', 'magazine', 'receiver',
+                    'chargingHandle', 'mount', 'functionalMod'
+                ];
+                if (types.some(t => badTypes.includes(t))) return false;
+
+                const kw = ['receiver', 'charging handle', 'grip', 'stock', 'barrel', 'slide',
+                    'magazine', 'mount', 'sight', 'scope', 'compensator', 'silencer',
+                    'suppressor', 'thread', 'adapter', 'gas block', 'handguard',
+                    'foregrip', 'chassis', 'buttpad', 'handle', 'buffer tube',
+                    'muzzle brake', 'pistol grip'
+                ];
+                if (kw.some(k => name.includes(k) || cat.includes(k))) return false;
+
+                return true;
+            },
+
+            // ---- prepare data ----
+            prepareData: function(data) {
+                // Items with icon and price
+                this.allItems = (data.items || []).filter(item => {
+                    const hasIcon = item.iconLink && item.iconLink.length > 0;
+                    const hasPrice = (item.avg24hPrice && item.avg24hPrice > 0) ||
+                        (item.basePrice && item.basePrice > 0);
+                    return hasIcon && hasPrice;
+                });
+
+                // Complete weapons for caliber questions
+                this.completeWeapons = this.allItems.filter(item => this.isCompleteWeapon(item));
+
+                // Traders
+                this.allTraders = (data.traders || []).filter(t => t.imageLink);
+            },
+
+            // ---- helpers ----
+            pickRandom: function(arr) {
+                if (!arr || !arr.length) return null;
+                return arr[Math.floor(Math.random() * arr.length)];
+            },
+
+            shuffle: function(arr) {
+                const a = [...arr];
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [a[i], a[j]] = [a[j], a[i]];
+                }
+                return a;
+            },
+
+            getDistractors: function(excludeId, pool, count = 3) {
+                const available = pool.filter(item => item.id !== excludeId);
+                const shuffled = this.shuffle(available);
+                return shuffled.slice(0, count);
+            },
+
+            // ---- get image URL ----
+            getImageUrl: function(entity) {
+                if (!entity) return null;
+                if (entity.iconLink) return entity.iconLink;
+                if (entity.imageLink) return entity.imageLink;
+                return null;
+            },
+
+            // ---- question generators ----
+            generateItemQuestion: function() {
+                const item = this.pickRandom(this.allItems);
+                if (!item) return null;
+
+                const categories = [];
+                categories.push({ id: 'name', label: 'Answer by Name', points: 10, icon: '📝' });
+                if (item.properties?.caliber && item.properties.caliber !== 'Caliber') {
+                    categories.push({ id: 'caliber', label: 'Answer by Caliber', points: 15, icon: '🎯' });
+                }
+                if (item.basePrice && item.basePrice > 0) {
+                    categories.push({ id: 'price', label: 'Answer by Price', points: 20, icon: '💰' });
+                }
+
+                if (categories.length === 0) return null;
+
+                return {
+                    type: 'item',
+                    itemData: item,
+                    categories: categories,
+                    title: 'What do you want to identify?',
+                    displayIcon: item,
+                };
+            },
+
+            generateTraderQuestion: function() {
+                if (this.allTraders.length < 4) return null;
+                const correct = this.pickRandom(this.allTraders);
+                if (!correct) return null;
+                const distractors = this.getDistractors(correct.id, this.allTraders, 3);
+                if (distractors.length < 3) return null;
+                const options = this.shuffle([correct, ...distractors]);
+                return {
+                    type: 'trader',
+                    title: 'Which trader is this?',
+                    correct: correct,
+                    options: options,
+                    displayIcon: correct,
+                    getCorrectDisplay: () => correct.name || 'Unknown Trader',
+                    getOptionDisplay: (item) => item.name || 'Unknown',
+                    points: 10,
+                };
+            },
+
+            // ---- generate random question ----
+            generateQuestion: function() {
+                const generators = [
+                    this.generateItemQuestion.bind(this),
+                    this.generateTraderQuestion.bind(this),
+                ];
+
+                for (let attempt = 0; attempt < 10; attempt++) {
+                    const gen = this.pickRandom(generators);
+                    if (gen) {
+                        const result = gen();
+                        if (result) return result;
+                    }
+                }
+
+                for (const gen of generators) {
+                    const result = gen();
+                    if (result) return result;
+                }
+
+                throw new Error('Unable to generate a valid question.');
+            },
+
+            // ---- display icon ----
+            setIcon: function(entity, className = '') {
+                const box = this.el.iconBox;
+                const imgUrl = entity ? this.getImageUrl(entity) : null;
+
+                let iconHtml = '';
+                if (imgUrl) {
+                    iconHtml =
+                        `<img src="${imgUrl}" alt="${entity.name || 'item'}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling?.style.display='block'" />`;
+                } else {
+                    iconHtml = `<span class="placeholder">␣</span>`;
+                }
+
+                const wiki = entity?.wikiLink || null;
+                if (wiki) {
+                    box.innerHTML =
+                        `<a href="${wiki}" target="_blank" rel="noopener noreferrer" title="View on Tarkov Wiki">${iconHtml}</a>`;
+                } else {
+                    box.innerHTML = iconHtml;
+                }
+
+                box.className = 'icon-box' + (className ? ' ' + className : '');
+            },
+
+            // ---- render category selection (for item questions) ----
+            renderCategorySelection: function(question) {
+                const container = this.el.categorySelection;
+                container.innerHTML = '';
+                container.classList.add('visible');
+
+                question.categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn';
+                    btn.innerHTML = `${cat.icon} ${cat.label} <span class="cat-points">(${cat.points} pts)</span>`;
+                    btn.dataset.category = cat.id;
+                    btn.addEventListener('click', () => this.handleCategorySelection(cat.id, question));
+                    container.appendChild(btn);
+                });
+            },
+
+            // ---- handle category selection ----
+            handleCategorySelection: function(categoryId, question) {
+                const item = question.itemData;
+                let options = [];
+                let correctValue = null;
+                let points = 0;
+                let newTitle = '';
+
+                // Hide category selection
+                this.el.categorySelection.classList.remove('visible');
+
+                if (categoryId === 'name') {
+                    const distractors = this.getDistractors(item.id, this.allItems, 3);
+                    if (distractors.length < 3) return;
+                    const optionItems = this.shuffle([item, ...distractors]);
+                    options = optionItems.map(i => ({ text: i.name || i.shortName || 'Unknown', wiki: i.wikiLink }));
+                    correctValue = item.name || item.shortName;
+                    points = 10;
+                    newTitle = 'What is this item?';
+                } else if (categoryId === 'caliber') {
+                    const calWeapons = this.completeWeapons.filter(w =>
+                        w.id !== item.id &&
+                        w.properties?.caliber &&
+                        w.properties.caliber !== 'Caliber' &&
+                        w.properties.caliber !== item.properties.caliber
+                    );
+                    const shuffled = this.shuffle(calWeapons);
+                    const selected = shuffled.slice(0, 3);
+                    const calOptions = [item, ...selected];
+                    const shuffledOptions = this.shuffle(calOptions);
+                    options = shuffledOptions.map(i => ({
+                        text: i.properties?.caliber?.replace('Caliber', '').trim() || 'Unknown',
+                        wiki: i.wikiLink
+                    }));
+                    correctValue = item.properties.caliber.replace('Caliber', '').trim();
+                    points = 15;
+                    newTitle = 'What caliber is this weapon?';
+                } else if (categoryId === 'price') {
+                    let distractors = this.allItems.filter(i =>
+                        i.id !== item.id &&
+                        i.basePrice &&
+                        i.basePrice > 0
+                    );
+                    // Try to get close prices first
+                    let closePrices = distractors.filter(i =>
+                        Math.abs(i.basePrice - item.basePrice) < 50000
+                    );
+                    let selectedDistractors = closePrices.length >= 3 ? closePrices : distractors;
+                    const shuffled = this.shuffle(selectedDistractors);
+                    const selected = shuffled.slice(0, 3);
+                    const priceOptions = [item, ...selected];
+                    const shuffledOptions = this.shuffle(priceOptions);
+                    options = shuffledOptions.map(i => ({
+                        text: '₽' + (i.basePrice || 0).toLocaleString(),
+                        wiki: i.wikiLink
+                    }));
+                    correctValue = '₽' + item.basePrice.toLocaleString();
+                    points = 20;
+                    newTitle = 'What is the base price of this item?';
+                }
+
+                // Update the question title
+                this.el.questionTitle.textContent = newTitle;
+
+                // Store points and correct value
+                question.points = points;
+                question.correctDisplay = correctValue;
+                // Find which option is correct
+                let correctIndex = -1;
+                options.forEach((opt, idx) => {
+                    if (opt.text === correctValue) {
+                        correctIndex = idx;
+                    }
+                });
+
+                // If not found, try comparing without ₽ for price
+                if (correctIndex === -1 && categoryId === 'price') {
+                    const cleanCorrect = correctValue.replace('₽', '').replace(/,/g, '');
+                    options.forEach((opt, idx) => {
+                        const cleanOpt = opt.text.replace('₽', '').replace(/,/g, '');
+                        if (cleanOpt === cleanCorrect) correctIndex = idx;
+                    });
+                }
+
+                // Render the options
+                this.renderOptions(question, options, correctIndex);
+            },
+
+            // ---- render options ----
+            renderOptions: function(question, options, correctIndex) {
+                const grid = this.el.optionsGrid;
+                grid.innerHTML = '';
+                grid.classList.remove('hidden');
+
+                const correctValue = options[correctIndex]?.text;
+
+                options.forEach((item, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.dataset.index = index;
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'option-text';
+                    nameSpan.textContent = item.text;
+
+                    const wikiLink = document.createElement('a');
+                    wikiLink.className = 'option-wiki';
+                    const w = item.wiki || null;
+                    wikiLink.href = w || '#';
+                    wikiLink.target = '_blank';
+                    wikiLink.rel = 'noopener noreferrer';
+                    wikiLink.textContent = '↗';
+                    wikiLink.title = 'View on Tarkov Wiki';
+                    if (!w) {
+                        wikiLink.style.opacity = '0.2';
+                        wikiLink.style.cursor = 'default';
+                        wikiLink.href = '#';
+                    }
+
+                    btn.appendChild(nameSpan);
+                    btn.appendChild(wikiLink);
+
+                    if (this.debugMode && index === correctIndex) {
+                        btn.classList.add('show-correct');
+                    }
+
+                    btn.addEventListener('click', () => this.handleAnswer(index, correctIndex));
+                    grid.appendChild(btn);
+                });
+
+                // Store correct index for answer handling
+                this.currentQuestion.correctIndex = correctIndex;
+                this.currentQuestion.points = question.points;
+                this.currentQuestion.correctDisplay = correctValue;
+            },
+
+            // ---- shuffle animation ----
+            performShuffle: function(displayEntity, callback) {
+                const totalDuration = 2000;
+                const startTime = Date.now();
+
+                this.stopShuffle();
+                this.isShuffling = true;
+
+                const box = this.el.iconBox;
+                const label = this.el.iconLabel;
+                label.textContent = '🔍 revealing ...';
+                label.classList.add('shuffling-label');
+                this.el.feedbackArea.innerHTML = `<span class="shuffle-hint">⚡ opening ...</span>`;
+                this.el.optionsGrid.classList.add('hidden');
+                this.el.categorySelection.classList.remove('visible');
+
+                let phase = 'fast';
+                const shuffleStep = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+
+                    let interval;
+                    let phaseClass = '';
+
+                    if (progress < 0.3) {
+                        interval = 40 + Math.random() * 30;
+                        phaseClass = 'shuffling-fast';
+                        if (phase !== 'fast') {
+                            phase = 'fast';
+                            box.className = 'icon-box shuffling ' + phaseClass;
+                        }
+                    } else if (progress < 0.55) {
+                        interval = 80 + Math.random() * 60;
+                        phaseClass = 'shuffling-medium';
+                        if (phase !== 'medium') {
+                            phase = 'medium';
+                            box.className = 'icon-box shuffling ' + phaseClass;
+                        }
+                    } else if (progress < 0.8) {
+                        interval = 150 + Math.random() * 120;
+                        phaseClass = 'shuffling-slow';
+                        if (phase !== 'slow') {
+                            phase = 'slow';
+                            box.className = 'icon-box shuffling ' + phaseClass;
+                        }
+                    } else if (progress < 0.95) {
+                        interval = 250 + Math.random() * 250;
+                        phaseClass = 'shuffling-slow';
+                        if (phase !== 'suspense') {
+                            phase = 'suspense';
+                            box.className = 'icon-box shuffling ' + phaseClass;
+                            label.textContent = '🎯 almost there ...';
+                        }
+                    } else {
+                        // FINAL - show the actual item icon
+                        this.setIcon(displayEntity, 'reveal');
+                        label.textContent = '';
+                        label.classList.remove('shuffling-label');
+                        this.el.feedbackArea.innerHTML = '';
+                        this.isShuffling = false;
+                        if (callback) callback();
+                        return;
+                    }
+
+                    // Show random item during shuffle
+                    const randomItem = this.pickRandom(this.allItems);
+                    const boxEl = this.el.iconBox;
+                    if (randomItem && randomItem.iconLink) {
+                        boxEl.innerHTML =
+                            `<img src="${randomItem.iconLink}" alt="shuffling" loading="lazy" onerror="this.style.display='none'" />`;
+                    } else {
+                        boxEl.innerHTML = `<span class="placeholder">␣</span>`;
+                    }
+                    boxEl.className = 'icon-box shuffling ' + phaseClass;
+
+                    this.shuffleTimeout = setTimeout(shuffleStep, interval);
+                };
+
+                shuffleStep();
+            },
+
+            stopShuffle: function() {
+                if (this.shuffleTimeout) {
+                    clearTimeout(this.shuffleTimeout);
+                    this.shuffleTimeout = null;
+                }
+                this.isShuffling = false;
+            },
+
+            // ---- update lives display ----
+            updateLivesDisplay: function() {
+                const hearts = '❤️'.repeat(Math.max(0, this.lives));
+                const empty = '🖤'.repeat(Math.max(0, 3 - this.lives));
+                this.el.livesDisplay.textContent = hearts + empty;
+            },
+
+            // ---- game over ----
+            gameOver: function() {
+                this.gameOver = true;
+                this.isLoading = false;
+                if (this.advanceTimeout) {
+                    clearTimeout(this.advanceTimeout);
+                    this.advanceTimeout = null;
+                }
+                this.stopShuffle();
+
+                this.el.questionDisplay.classList.remove('active');
+                this.el.shuffleStart.style.display = 'flex';
+                this.el.startIcon.textContent = '💀';
+                this.el.startTitle.textContent = 'GAME OVER';
+                this.el.startSub.textContent = `final score: ${this.score}`;
+                this.el.shuffleBtn.textContent = '[ play again ]';
+                this.el.shuffleBtn.style.display = 'block';
+                this.el.shuffleBtn.onclick = () => this.startGame();
+
+                this.setStatus('game over', '');
+            },
+
+            // ---- render question ----
+            renderQuestion: function(question) {
+                if (!question) return;
+
+                this.currentQuestion = question;
+                this.isAnswered = false;
+
+                this.el.shuffleStart.style.display = 'none';
+                this.el.questionDisplay.classList.add('active');
+
+                this.el.questionTitle.textContent = question.title;
+
+                // Reset icon to placeholder
+                this.setIcon(null);
+                this.el.iconLabel.textContent = '';
+
+                this.el.optionsGrid.classList.add('hidden');
+                this.el.categorySelection.classList.remove('visible');
+                this.el.feedbackArea.innerHTML = '';
+
+                // Start shuffle with the display icon
+                this.performShuffle(question.displayIcon, () => {
+                    // After shuffle completes
+                    if (question.type === 'trader') {
+                        this.el.iconLabel.textContent = '🧑‍💼 ' + question.correct.name;
+                        // Render options directly for trader
+                        const options = question.options.map(i => ({
+                            text: question.getOptionDisplay(i),
+                            wiki: i.wikiLink
+                        }));
+                        let correctIndex = -1;
+                        question.options.forEach((opt, idx) => {
+                            if (opt.id === question.correct.id) correctIndex = idx;
+                        });
+                        this.renderOptions(question, options, correctIndex);
+                        this.el.feedbackArea.innerHTML = '';
+                    } else if (question.type === 'item') {
+                        // Show category selection
+                        this.el.iconLabel.textContent = '🎯 choose a category';
+                        this.renderCategorySelection(question);
+                        this.el.feedbackArea.innerHTML = '';
+                    }
+                });
+            },
+
+            // ---- handle answer ----
+            handleAnswer: function(index, correctIndex) {
+                if (this.isAnswered || this.isLoading || this.isShuffling || this.gameOver) return;
+                this.isAnswered = true;
+
+                const isCorrect = index === correctIndex;
+                const points = this.currentQuestion.points || 0;
+
+                const btns = this.el.optionsGrid.querySelectorAll('.option-btn');
+                btns.forEach((btn, i) => {
+                    btn.disabled = true;
+                    if (i === correctIndex) {
+                        btn.classList.add('show-correct');
+                    }
+                    if (i === index) {
+                        if (isCorrect) {
+                            btn.classList.add('selected-correct');
+                        } else {
+                            btn.classList.add('selected-wrong');
+                        }
+                    }
+                });
+
+                const box = this.el.iconBox;
+                const fb = this.el.feedbackArea;
+                const correctDisplay = this.currentQuestion.correctDisplay || 'Unknown';
+
+                if (isCorrect) {
+                    box.classList.add('correct');
+                    if (!this.debugMode) {
+                        this.score += points;
+                        this.el.scoreDisplay.textContent = this.score;
+                    }
+                    fb.innerHTML = `<span class="correct-text">✓ CORRECT!</span> <span class="sub-text">(+${points} pts)</span>`;
+                } else {
+                    box.classList.add('wrong');
+                    if (!this.debugMode) {
+                        this.lives -= 1;
+                        this.updateLivesDisplay();
+                        if (this.lives === 0) {
+                            this.gameOver();
+                            return;
+                        }
+                    }
+                    fb.innerHTML =
+                        `<span class="wrong-text">✗ WRONG</span> <span class="sub-text">→ ${correctDisplay}</span>`;
+                }
+
+                this.isLoading = true;
+                if (this.advanceTimeout) clearTimeout(this.advanceTimeout);
+                this.advanceTimeout = setTimeout(() => {
+                    if (this.gameOver) return;
+                    this.isLoading = false;
+                    this.nextQuestion();
+                }, 2000);
+            },
+
+            // ---- next question ----
+            nextQuestion: function() {
+                try {
+                    const q = this.generateQuestion();
+                    if (q) {
+                        this.renderQuestion(q);
+                    } else {
+                        this.el.feedbackArea.innerHTML =
+                            `<span style="color:var(--wrong);">⚠️ no more questions available</span>`;
+                    }
+                } catch (err) {
+                    console.warn('Failed to generate question:', err);
+                    this.el.optionsGrid.innerHTML = `
+                <div class="empty-state">
+                  <span class="big">⚠️</span>
+                  ${err.message || 'Failed to generate question'}
+                  <div class="sub">try again</div>
+                </div>
+              `;
+                    this.el.feedbackArea.innerHTML = `<span style="color:var(--wrong);">error: ${err.message}</span>`;
+                }
+            },
+
+            // ---- start game ----
+            startGame: function() {
+                if (this.isLoading) return;
+                this.isLoading = true;
+
+                // Reset state
+                this.lives = 3;
+                this.score = 0;
+                this.gameOver = false;
+                this.updateLivesDisplay();
+                this.el.scoreDisplay.textContent = '0';
+
+                // Reset shuffle start to default
+                this.el.startIcon.textContent = '🎲';
+                this.el.startTitle.textContent = 'READY TO PLAY';
+                this.el.startSub.textContent = '5 question types · 10 points each';
+                this.el.shuffleBtn.style.display = 'none';
+
+                // Hide start, show question
+                this.el.shuffleStart.style.display = 'none';
+                this.el.questionDisplay.classList.add('active');
+
+                try {
+                    const q = this.generateQuestion();
+                    if (q) {
+                        this.renderQuestion(q);
+                    } else {
+                        throw new Error('Unable to generate first question.');
+                    }
+                } catch (err) {
+                    console.error('Start error:', err);
+                    this.el.feedbackArea.innerHTML = `<span style="color:var(--wrong);">⚠️ ${err.message}</span>`;
+                }
+
+                this.isLoading = false;
+                this.setStatus('playing', 'ready');
+            },
+
+            // ---- countdown to start ----
+            startCountdown: function() {
+                this.el.shuffleStart.style.display = 'flex';
+                this.el.questionDisplay.classList.remove('active');
+                this.el.shuffleBtn.style.display = 'none';
+
+                this.el.startIcon.textContent = '⏳';
+                this.el.startTitle.textContent = 'Ready?';
+                this.el.startSub.textContent = '';
+
+                let count = 3;
+                const countdown = () => {
+                    if (count > 0) {
+                        this.el.startTitle.textContent = `${count}...`;
+                        count--;
+                        setTimeout(countdown, 1000);
+                    } else {
+                        this.el.startTitle.textContent = 'Let\'s go!';
+                        this.el.startIcon.textContent = '🚀';
+                        setTimeout(() => {
+                            this.startGame();
+                        }, 800);
+                    }
+                };
+                setTimeout(countdown, 500);
+            },
+
+            // ---- set status ----
+            setStatus: function(text, state) {
+                const el = this.el.statusText;
+                const dot = this.el.statusDot;
+                if (el) el.textContent = text;
+                if (dot) {
+                    dot.className = 'dot';
+                    if (state === 'loading') dot.classList.add('loading');
+                    if (state === 'ready') dot.classList.add('ready');
+                }
+            },
+
+            // ---- init ----
+            init: async function() {
+                this.setStatus('loading data ...', 'loading');
+                this.el.shuffleBtn.style.display = 'none';
+                // Ensure debug is off initially
+                this.el.debugToggle.checked = false;
+                this.debugMode = false;
+
+                try {
+                    const data = await this.fetchAllData();
+                    this.prepareData(data);
+
+                    if (this.allItems.length < 10) {
+                        throw new Error('Not enough items loaded. Try again.');
+                    }
+
+                    this.updateLivesDisplay();
+
+                    // Start the countdown
+                    this.startCountdown();
+
+                    this.setStatus('ready', 'ready');
+
+                    this.el.debugToggle.addEventListener('change', () => {
+                        this.debugMode = this.el.debugToggle.checked;
+                        if (this.currentQuestion && !this.isAnswered && !this.isShuffling && !this.gameOver) {
+                            const q = this.currentQuestion;
+                            const btns = this.el.optionsGrid.querySelectorAll('.option-btn');
+                            if (q.correctIndex !== undefined) {
+                                btns.forEach((btn, i) => {
+                                    if (this.debugMode && i === q.correctIndex) {
+                                        btn.classList.add('show-correct');
+                                    } else {
+                                        btn.classList.remove('show-correct');
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                } catch (err) {
+                    console.error('Init error:', err);
+                    this.setStatus('error', '');
+                    document.querySelector('.quiz-area').innerHTML = `
+                <div class="empty-state" style="grid-column:1/-1;padding:60px 20px;">
+                  <span class="big">✖</span>
+                  failed to load data
+                  <div class="sub">${err.message || 'unknown error'}</div>
+                  <button onclick="TriviaApp.init()">↻ retry</button>
+                </div>
+              `;
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => TriviaApp.init());
+    </script>
+
+</body>
+</html>
