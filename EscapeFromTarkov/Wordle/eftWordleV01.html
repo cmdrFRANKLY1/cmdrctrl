@@ -691,7 +691,10 @@
         // ================================================================
 
         const WordleApp = {
-            API_URL: 'https://api.tarkov.dev/graphql',
+            // Local Vercel proxy route
+            PROXY_URL: '/api/tarkov-data',
+            // Fallback direct URL if the serverless routing is unavailable
+            FALLBACK_API_URL: 'https://api.tarkov.dev/graphql',
 
             allItems: [],
             allTraders: [],
@@ -743,36 +746,73 @@
             },
 
             // ============================================================
-            //  FETCH DATA
+            //  FETCH DATA (Tries proxy first, falls back directly to API)
             // ============================================================
             fetchAllData: async function() {
-                const q = `
-                query {
-                    items {
-                        id
-                        name
-                        shortName
-                        iconLink
-                        wikiLink
-                        types
-                        category { name }
+                try {
+                    // Update status: Reading from Local Cache
+                    this.setStatus('READING CACHED DATA...', 'loading');
+
+                    // 1. Attempt Vercel Edge Serverless Caching Layer
+                    const r = await fetch(this.PROXY_URL);
+                    if (!r.ok) {
+                        throw new Error(`Proxy returned status: ${r.status}`);
                     }
-                    traders {
-                        id
-                        name
-                        imageLink
-                        image4xLink
+                    const j = await r.json();
+                    return this.parseResponse(j);
+                } catch (proxyError) {
+                    console.warn("Vercel API Cache unreachable or incompatible, falling back directly to Tarkov API:", proxyError);
+                    
+                    // Update status: Fetching from Online API directly
+                    this.setStatus('GETTING ONLINE DATA...', 'loading');
+
+                    // 2. Direct Fallback connection to tarkov.dev
+                    const q = `
+                    query {
+                        items {
+                            id
+                            name
+                            shortName
+                            iconLink
+                            wikiLink
+                            types
+                            category { name }
+                        }
+                        traders {
+                            id
+                            name
+                            imageLink
+                            image4xLink
+                        }
                     }
+                    `;
+                    
+                    const r = await fetch(this.FALLBACK_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q })
+                    });
+                    
+                    const j = await r.json();
+                    if (j.errors) throw new Error(j.errors[0].message);
+                    return this.parseResponse(j);
                 }
-                `;
-                const r = await fetch(this.API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: q })
-                });
-                const j = await r.json();
-                if (j.errors) throw new Error(j.errors[0].message);
-                return j.data;
+            },
+
+            // Safe parsing of both direct API payloads and proxy payloads
+            parseResponse: function(jsonPayload) {
+                let items = [];
+                let traders = [];
+                if (jsonPayload && jsonPayload.data) {
+                    // Support both standard items format and custom pvp proxy format
+                    if (jsonPayload.data.items) {
+                        items = jsonPayload.data.items;
+                    } else if (jsonPayload.data.pvp) {
+                        items = jsonPayload.data.pvp;
+                    }
+                    traders = jsonPayload.data.traders || [];
+                }
+                return { items, traders };
             },
 
             // ============================================================
@@ -1238,7 +1278,7 @@
             },
 
             init: async function() {
-                this.setStatus('syncing data...', 'loading');
+                this.setStatus('INITIALIZING...', 'loading');
                 this.el.startBtn.disabled = true;
                 this.el.wordCount.textContent = 'Syncing...';
 
@@ -1277,7 +1317,7 @@
                     this.el.startSub.textContent =
                         `Decipher the 5‑letter military term in 6 tries. ${this.wordPool.length} active variations loaded.`;
 
-                    this.setStatus('active', 'ready');
+                    this.setStatus('READY', 'ready');
 
                     this.el.debugToggle.addEventListener('change', () => {
                         this.debugMode = this.el.debugToggle.querySelector('input').checked;
@@ -1310,7 +1350,7 @@
 
                 } catch (err) {
                     console.error('Init error:', err);
-                    this.setStatus('offline', '');
+                    this.setStatus('API ERROR', '');
                     this.el.startBtn.disabled = true;
                     this.el.wordCount.textContent = '⚠️ sync failed';
                     document.querySelector('.game-area').innerHTML += `

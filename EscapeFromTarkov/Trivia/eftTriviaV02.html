@@ -806,7 +806,10 @@
         //  TARKOV TRIVIA · ITEM CATEGORIES (Name, Caliber, Price)
         // ================================================================
         const TriviaApp = {
-            API_URL: 'https://api.tarkov.dev/graphql',
+            // Local Vercel proxy route
+            PROXY_URL: '/api/tarkov-data',
+            // Fallback direct URL if the serverless routing is unavailable
+            FALLBACK_API_URL: 'https://api.tarkov.dev/graphql',
 
             allItems: [],
             completeWeapons: [],
@@ -845,42 +848,85 @@
                 debugToggle: document.getElementById('debugToggle'),
             },
 
-            // ---- fetch data ----
+            // ---- fetch data (Tries proxy first, falls back directly to API if proxy has no traders) ----
             fetchAllData: async function() {
-                const q = `
-              query {
-                items(lang: en) {
-                  id
-                  name
-                  shortName
-                  iconLink
-                  wikiLink
-                  basePrice
-                  avg24hPrice
-                  types
-                  category { id name }
-                  properties {
-                    __typename
-                    ... on ItemPropertiesWeapon {
-                      caliber
+                try {
+                    // Update status: Reading from Local Cache
+                    this.setStatus('READING CACHED DATA...', 'loading');
+
+                    // 1. Attempt Vercel Edge Serverless Caching Layer
+                    const r = await fetch(this.PROXY_URL);
+                    if (!r.ok) {
+                        throw new Error(`Proxy returned status: ${r.status}`);
                     }
-                  }
+                    const j = await r.json();
+
+                    // If cached proxy data does not contain traders, fall back to direct fetch 
+                    // so Trader trivia questions remain available and fully functional.
+                    if (!j.data || !j.data.traders || j.data.traders.length === 0) {
+                        throw new Error("Proxy data is missing trader records.");
+                    }
+
+                    return this.parseResponse(j);
+                } catch (proxyError) {
+                    console.warn("Vercel API Cache unreachable or lacks trader data, falling back directly to Tarkov API:", proxyError);
+                    
+                    // Update status: Fetching from Online API directly
+                    this.setStatus('GETTING ONLINE DATA...', 'loading');
+
+                    // 2. Direct Fallback connection to tarkov.dev
+                    const q = `
+                    query {
+                        items(lang: en) {
+                            id
+                            name
+                            shortName
+                            iconLink
+                            wikiLink
+                            basePrice
+                            avg24hPrice
+                            types
+                            category { id name }
+                            properties {
+                                __typename
+                                ... on ItemPropertiesWeapon {
+                                    caliber
+                                }
+                            }
+                        }
+                        traders {
+                            id
+                            name
+                            imageLink
+                        }
+                    }
+                    `;
+                    
+                    const r = await fetch(this.FALLBACK_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q })
+                    });
+                    
+                    const j = await r.json();
+                    if (j.errors) throw new Error(j.errors[0].message);
+                    return this.parseResponse(j);
                 }
-                traders {
-                  id
-                  name
-                  imageLink
+            },
+
+            // Safe parsing of both direct API payloads and proxy payloads
+            parseResponse: function(jsonPayload) {
+                let items = [];
+                let traders = [];
+                if (jsonPayload && jsonPayload.data) {
+                    if (jsonPayload.data.items) {
+                        items = jsonPayload.data.items;
+                    } else if (jsonPayload.data.pvp) {
+                        items = jsonPayload.data.pvp;
+                    }
+                    traders = jsonPayload.data.traders || [];
                 }
-              }
-            `;
-                const r = await fetch(this.API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: q })
-                });
-                const j = await r.json();
-                if (j.errors) throw new Error(j.errors[0].message);
-                return j.data;
+                return { items, traders };
             },
 
             // ---- filter complete weapons (no mods, no parts) ----
@@ -1430,7 +1476,7 @@
                         this.renderQuestion(q);
                     } else {
                         this.el.feedbackArea.innerHTML =
-                            `<span style="color:var(--wrong);">⚠️ no more questions available</span>`;
+                            `<span class="wrong-text">⚠️ no more questions available</span>`;
                     }
                 } catch (err) {
                     console.warn('Failed to generate question:', err);
@@ -1441,7 +1487,7 @@
                   <div class="sub">try again</div>
                 </div>
               `;
-                    this.el.feedbackArea.innerHTML = `<span style="color:var(--wrong);">error: ${err.message}</span>`;
+                    this.el.feedbackArea.innerHTML = `<span class="wrong-text">error: ${err.message}</span>`;
                 }
             },
 
@@ -1476,7 +1522,7 @@
                     }
                 } catch (err) {
                     console.error('Start error:', err);
-                    this.el.feedbackArea.innerHTML = `<span style="color:var(--wrong);">⚠️ ${err.message}</span>`;
+                    this.el.feedbackArea.innerHTML = `<span class="wrong-text">⚠️ ${err.message}</span>`;
                 }
 
                 this.isLoading = false;
@@ -1524,7 +1570,7 @@
 
             // ---- init ----
             init: async function() {
-                this.setStatus('loading data ...', 'loading');
+                this.setStatus('INITIALIZING...', 'loading');
                 this.el.shuffleBtn.style.display = 'none';
                 // Ensure debug is off initially
                 this.el.debugToggle.checked = false;
@@ -1543,7 +1589,7 @@
                     // Start the countdown
                     this.startCountdown();
 
-                    this.setStatus('ready', 'ready');
+                    this.setStatus('READY', 'ready');
 
                     this.el.debugToggle.addEventListener('change', () => {
                         this.debugMode = this.el.debugToggle.checked;
@@ -1564,7 +1610,7 @@
 
                 } catch (err) {
                     console.error('Init error:', err);
-                    this.setStatus('error', '');
+                    this.setStatus('API ERROR', '');
                     document.querySelector('.quiz-area').innerHTML = `
                 <div class="empty-state" style="grid-column:1/-1;padding:60px 20px;">
                   <span class="big">✖</span>
