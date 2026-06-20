@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarkov Wordle</title>
+    <style>
+        /* ===== RESET & VARIABLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --border: #2a2a2a;
+            --border-light: #3a3a3a;
+            --text: #e8e8e8;
+            --text-dim: #777777;
+            --text-muted: #444444;
+            --correct: #4caf50;
+            --wrong: #f44336;
+            --gold: #ffd700;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono: Consolas, "Courier New", monospace;
+            --tile-size: 52px;
+            --tile-gap: 6px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app {
+            max-width: 560px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-title {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+        .header-title span {
+            font-weight: 300;
+            color: var(--text-dim);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-score {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 4px 14px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-score .score-value {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .header-status {
+            font-size: 10px;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            font-family: var(--mono);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-status .dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            transition: background 0.2s;
+        }
+        .header-status .dot.loading {
+            background: #aaaaaa;
+            animation: blink 0.9s step-end infinite;
+        }
+        .header-status .dot.ready {
+            background: #ffffff;
+        }
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
+        .debug-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-dim);
+            font-family: var(--mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .debug-toggle input[type="checkbox"] {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .debug-toggle input[type="checkbox"]:checked {
+            background: var(--border-light);
+            border-color: var(--text-dim);
+        }
+        .debug-toggle input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: #fff;
+            font-size: 11px;
+            position: absolute;
+            top: -2px;
+            left: 1px;
+        }
+        .debug-toggle input[type="checkbox"]:hover {
+            border-color: var(--text-dim);
+        }
+
+        /* ===== GAME AREA ===== */
+        .game-area {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 24px 18px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-height: 460px;
+            position: relative;
+        }
+
+        /* ===== START SCREEN ===== */
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 30px 16px;
+            width: 100%;
+            min-height: 340px;
+        }
+        .start-screen .start-icon {
+            font-size: 64px;
+            color: var(--text-dim);
+            animation: shuffle-bounce 2s ease-in-out infinite;
+        }
+        @keyframes shuffle-bounce {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(10deg);
+            }
+        }
+        .start-screen .start-title {
+            font-family: var(--mono);
+            font-size: 20px;
+            color: var(--text);
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        .start-screen .start-sub {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-align: center;
+            max-width: 320px;
+        }
+        .start-screen .btn-start {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: #fff;
+            font-family: var(--mono);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px 44px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            background: var(--bg);
+            margin-top: 6px;
+        }
+        .start-screen .btn-start:hover:not(:disabled) {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+            transform: scale(1.02);
+        }
+        .start-screen .btn-start:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .start-screen .btn-start:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .start-screen .word-count {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            margin-top: 4px;
+        }
+
+        /* ===== WORDLE GRID ===== */
+        .wordle-grid {
+            display: none;
+            flex-direction: column;
+            gap: var(--tile-gap);
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+            padding: 4px 0;
+        }
+        .wordle-grid.active {
+            display: flex;
+        }
+
+        .grid-row {
+            display: flex;
+            gap: var(--tile-gap);
+            justify-content: center;
+        }
+
+        .tile {
+            width: var(--tile-size);
+            height: var(--tile-size);
+            border: 2px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font);
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text);
+            transition: border-color 0.2s, background 0.3s, transform 0.2s, box-shadow 0.3s;
+            user-select: none;
+            position: relative;
+        }
+        .tile.filled {
+            border-color: var(--border-light);
+        }
+        .tile.active {
+            border-color: #888;
+            animation: tile-pulse 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes tile-pulse {
+            0% {
+                border-color: #888;
+                box-shadow: 0 0 4px rgba(255, 255, 255, 0.05);
+            }
+            100% {
+                border-color: #bbb;
+                box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+            }
+        }
+
+        .tile.correct {
+            background: var(--correct) !important;
+            border-color: var(--correct) !important;
+            color: #fff !important;
+            animation: tile-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tile.present {
+            background: var(--gold) !important;
+            border-color: var(--gold) !important;
+            color: #000 !important;
+            animation: tile-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .tile.absent {
+            background: var(--text-muted) !important;
+            border-color: var(--text-muted) !important;
+            color: #fff !important;
+            animation: tile-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes tile-pop {
+            0% {
+                transform: scale(0.85);
+            }
+            50% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .tile.shake {
+            animation: tile-shake 0.4s ease;
+        }
+        @keyframes tile-shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-8px);
+            }
+            40% {
+                transform: translateX(8px);
+            }
+            60% {
+                transform: translateX(-4px);
+            }
+            80% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* ===== KEYBOARD ===== */
+        .keyboard {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 4px 0;
+        }
+        .keyboard.active {
+            display: flex;
+        }
+
+        .kb-row {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .kb-key {
+            min-width: 34px;
+            height: 44px;
+            padding: 0 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex: 1;
+            max-width: 44px;
+        }
+        .kb-key.wide {
+            flex: 1.8;
+            max-width: 68px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .kb-key:hover:not(:disabled) {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+        }
+        .kb-key:active:not(:disabled) {
+            transform: scale(0.94);
+        }
+        .kb-key:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .kb-key.correct {
+            background: var(--correct) !important;
+            border-color: var(--correct) !important;
+            color: #fff !important;
+        }
+        .kb-key.present {
+            background: var(--gold) !important;
+            border-color: var(--gold) !important;
+            color: #000 !important;
+        }
+        .kb-key.absent {
+            background: var(--text-muted) !important;
+            border-color: var(--text-muted) !important;
+            color: #fff !important;
+            opacity: 0.7;
+        }
+
+        /* ===== FEEDBACK ===== */
+        .feedback-area {
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 14px;
+            font-weight: 700;
+            gap: 10px;
+            text-align: center;
+            flex-wrap: wrap;
+            padding: 0 6px;
+        }
+        .feedback-area .correct-text {
+            color: var(--correct);
+        }
+        .feedback-area .wrong-text {
+            color: var(--wrong);
+        }
+        .feedback-area .sub-text {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-dim);
+        }
+        .feedback-area .hint-text {
+            color: var(--gold);
+            font-weight: 400;
+            font-size: 12px;
+        }
+
+        /* ===== ANSWER REVEAL ===== */
+        .answer-reveal {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--mono);
+            font-size: 15px;
+            color: var(--text);
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+        }
+        .answer-reveal.visible {
+            display: flex;
+        }
+        .answer-reveal .answer-word {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 18px;
+            letter-spacing: 1px;
+        }
+        .answer-reveal .answer-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            filter: grayscale(0.3) brightness(1.2);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            :root {
+                --tile-size: 44px;
+                --tile-gap: 5px;
+            }
+            .header-title {
+                font-size: 17px;
+            }
+            .header-score {
+                font-size: 11px;
+                padding: 3px 10px;
+            }
+            .game-area {
+                padding: 16px 12px 14px;
+                min-height: 400px;
+            }
+            .tile {
+                font-size: 20px;
+            }
+            .kb-key {
+                height: 38px;
+                font-size: 12px;
+                min-width: 28px;
+                max-width: 36px;
+            }
+            .kb-key.wide {
+                max-width: 54px;
+                font-size: 11px;
+            }
+            .start-screen .start-icon {
+                font-size: 48px;
+            }
+            .start-screen .start-title {
+                font-size: 17px;
+            }
+            .feedback-area {
+                font-size: 12px;
+                min-height: 24px;
+            }
+            .answer-reveal {
+                font-size: 13px;
+            }
+            .answer-reveal .answer-word {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            :root {
+                --tile-size: 36px;
+                --tile-gap: 4px;
+            }
+            .tile {
+                font-size: 17px;
+            }
+            .kb-key {
+                height: 34px;
+                font-size: 10px;
+                min-width: 22px;
+                max-width: 30px;
+                padding: 0 4px;
+            }
+            .kb-key.wide {
+                max-width: 44px;
+                font-size: 10px;
+            }
+            .header-title {
+                font-size: 14px;
+            }
+            .game-area {
+                padding: 12px 8px 10px;
+                min-height: 360px;
+            }
+            .feedback-area {
+                font-size: 11px;
+            }
+            .answer-reveal {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+            .answer-reveal .answer-word {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+        <!-- HEADER -->
+        <header class="header">
+            <div>
+                <div class="header-title">TARKOV <span>WORDLE</span></div>
+                <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);letter-spacing:0.5px;">
+                    guess the 5‑letter word
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-score">
+                    🏆 <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <label class="debug-toggle">
+                    <input type="checkbox" id="strictToggle" />
+                    strict
+                </label>
+                <label class="debug-toggle">
+                    <input type="checkbox" id="debugToggle" />
+                    debug
+                </label>
+                <div class="header-status">
+                    <span class="dot" id="statusDot"></span>
+                    <span id="statusText">initializing ...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- GAME -->
+        <div class="game-area" id="gameArea">
+            <!-- START SCREEN -->
+            <div class="start-screen" id="startScreen">
+                <div class="start-icon" id="startIcon">🎯</div>
+                <div class="start-title" id="startTitle">TARKOV WORDLE</div>
+                <div class="start-sub" id="startSub">
+                    Guess the 5‑letter Tarkov word in 6 tries.<br />
+                    Words come from items, traders &amp; maps.
+                </div>
+                <button class="btn-start" id="startBtn">[ play ]</button>
+                <div class="word-count" id="wordCount">loading words ...</div>
+            </div>
+
+            <!-- WORDLE GRID -->
+            <div class="wordle-grid" id="wordleGrid"></div>
+
+            <!-- KEYBOARD -->
+            <div class="keyboard" id="keyboard"></div>
+
+            <!-- FEEDBACK -->
+            <div class="feedback-area" id="feedbackArea"></div>
+
+            <!-- ANSWER REVEAL -->
+            <div class="answer-reveal" id="answerReveal">
+                <span>answer:</span>
+                <span class="answer-word" id="answerWord">—</span>
+                <img class="answer-icon" id="answerIcon" src="" alt="" style="display:none;" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  TARKOV WORDLE · 5‑letter words from tarkov.dev
+        // ================================================================
+
+        const WordleApp = {
+            API_URL: 'https://api.tarkov.dev/graphql',
+
+            // Data
+            allItems: [],
+            allTraders: [],
+            wordPool: [],
+            answerWord: null,
+            answerItem: null,
+
+            // Game state
+            currentRow: 0,
+            currentCol: 0,
+            guesses: [],
+            gameOver: false,
+            win: false,
+            score: 0,
+            debugMode: false,
+            strictMode: false, // Strict forces guesses to be items from the Tarkov dictionary
+            isLoading: false,
+            isPlaying: false,
+
+            // Hardcoded Tarkov words as fallback / supplemental list
+            FALLBACK_WORDS: [
+                'killa', 'tagil', 'skier', 'fence', 'jaeger', 'woods',
+                'shore', 'labs', 'inter', 'reser', 'custom', 'facto',
+                'p226', 'm4a1', 'ak74', 'mp5', 'g18c', 'vepr', 'sks',
+                'svd', 'sv98', 'mosin', 'vss', 'val', 'asval',
+                'p90', 'mp7', 'mpx', 'vector', 'scav', 'pmc',
+                'slick', 'hex', 'kiver', 'ulach', 'altyn', 'fast',
+                'spawn', 'extr', 'dorms', 'loot', 'battl', 'tark',
+                'bt', 'bs', 'm995', 'm855', 'm80', 'm61',
+                'lps', '7n1', '7n3', '7n6', '7n9', '5h'
+            ],
+
+            // DOM refs
+            el: {
+                startScreen: document.getElementById('startScreen'),
+                startIcon: document.getElementById('startIcon'),
+                startTitle: document.getElementById('startTitle'),
+                startSub: document.getElementById('startSub'),
+                startBtn: document.getElementById('startBtn'),
+                wordCount: document.getElementById('wordCount'),
+                wordleGrid: document.getElementById('wordleGrid'),
+                keyboard: document.getElementById('keyboard'),
+                feedbackArea: document.getElementById('feedbackArea'),
+                answerReveal: document.getElementById('answerReveal'),
+                answerWord: document.getElementById('answerWord'),
+                answerIcon: document.getElementById('answerIcon'),
+                scoreDisplay: document.getElementById('scoreDisplay'),
+                statusText: document.getElementById('statusText'),
+                statusDot: document.getElementById('statusDot'),
+                debugToggle: document.getElementById('debugToggle'),
+                strictToggle: document.getElementById('strictToggle'),
+            },
+
+            // ============================================================
+            //  FETCH DATA
+            // ============================================================
+            fetchAllData: async function() {
+                const q = `
+                query {
+                    items {
+                        id
+                        name
+                        shortName
+                        iconLink
+                        wikiLink
+                        types
+                        category { name }
+                    }
+                    traders {
+                        id
+                        name
+                        imageLink
+                        image4xLink
+                    }
+                }
+                `;
+                const r = await fetch(this.API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: q })
+                });
+                const j = await r.json();
+                if (j.errors) throw new Error(j.errors[0].message);
+                return j.data;
+            },
+
+            // ============================================================
+            //  BUILD WORD POOL
+            // ============================================================
+            buildWordPool: function(data) {
+                const words = new Set();
+
+                const addWords = (str) => {
+                    if (!str) return;
+                    const parts = str.split(/[\s\-_()&,./]+/);
+                    for (const p of parts) {
+                        const clean = p.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                        if (clean.length === 5 && /^[a-zA-Z0-9]+$/.test(clean)) {
+                            words.add(clean);
+                        }
+                    }
+                };
+
+                (data.items || []).forEach(item => {
+                    if (item.name) addWords(item.name);
+                    if (item.shortName) addWords(item.shortName);
+                });
+                (data.traders || []).forEach(t => {
+                    if (t.name) addWords(t.name);
+                });
+                this.FALLBACK_WORDS.forEach(w => words.add(w.toLowerCase()));
+
+                const result = Array.from(words).filter(w => w.length === 5);
+                const alphaOnly = result.filter(w => /^[a-z]+$/.test(w));
+                const alphaNum = result.filter(w => /^[a-z0-9]+$/.test(w) && !/^[a-z]+$/.test(w));
+                let finalPool = [...alphaOnly];
+                if (finalPool.length < 20) finalPool = [...finalPool, ...alphaNum];
+                return [...new Set(finalPool)];
+            },
+
+            // ============================================================
+            //  GAME LOGIC
+            // ============================================================
+            pickAnswer: function() {
+                if (this.wordPool.length === 0) {
+                    this.wordPool = [...this.FALLBACK_WORDS];
+                }
+                const idx = Math.floor(Math.random() * this.wordPool.length);
+                const word = this.wordPool[idx];
+                let associated = null;
+                for (const item of this.allItems) {
+                    const name = (item.name || '').toLowerCase();
+                    const short = (item.shortName || '').toLowerCase();
+                    if (name.includes(word) || short === word || name === word) {
+                        associated = { type: 'item', data: item };
+                        break;
+                    }
+                }
+                if (!associated) {
+                    for (const t of this.allTraders) {
+                        const name = (t.name || '').toLowerCase();
+                        if (name.includes(word) || name === word) {
+                            associated = { type: 'trader', data: t };
+                            break;
+                        }
+                    }
+                }
+                return { word, associated };
+            },
+
+            initGame: function() {
+                this.currentRow = 0;
+                this.currentCol = 0; // Ensures fresh typing line
+                this.guesses = [];
+                this.gameOver = false;
+                this.win = false;
+                this.isPlaying = true;
+
+                const answer = this.pickAnswer();
+                this.answerWord = answer.word;
+                this.answerItem = answer.associated;
+
+                this.el.feedbackArea.innerHTML = '';
+                this.el.answerReveal.classList.remove('visible');
+                this.el.answerWord.textContent = '—';
+                this.el.answerIcon.style.display = 'none';
+
+                this.buildGrid();
+                this.buildKeyboard();
+                this.updateScore();
+                this.updateTileFocus();
+                this.setKeyboardEnabled(true);
+                this.setStatus('playing', 'ready');
+
+                // Instant debug hint if toggle is already on
+                if (this.debugMode && this.answerWord) {
+                    this.el.feedbackArea.innerHTML =
+                        `<span class="hint-text">🔍 ${this.answerWord.toUpperCase()}</span>`;
+                }
+            },
+
+            buildGrid: function() {
+                const grid = this.el.wordleGrid;
+                grid.innerHTML = '';
+                grid.classList.add('active');
+
+                for (let row = 0; row < 6; row++) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'grid-row';
+                    rowDiv.dataset.row = row;
+                    for (let col = 0; col < 5; col++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'tile';
+                        tile.dataset.row = row;
+                        tile.dataset.col = col;
+                        tile.textContent = '';
+                        rowDiv.appendChild(tile);
+                    }
+                    grid.appendChild(rowDiv);
+                }
+            },
+
+            getTile: function(row, col) {
+                const grid = this.el.wordleGrid;
+                const rowDiv = grid.querySelector(`.grid-row[data-row="${row}"]`);
+                if (!rowDiv) return null;
+                return rowDiv.querySelector(`.tile[data-col="${col}"]`);
+            },
+
+            getRowTiles: function(row) {
+                const grid = this.el.wordleGrid;
+                const rowDiv = grid.querySelector(`.grid-row[data-row="${row}"]`);
+                if (!rowDiv) return [];
+                // SAFELY RETURN AS NATIVE ARRAY (PREVENTS FOREACH BUGS ON OLDER ENGINES)
+                return Array.from(rowDiv.querySelectorAll('.tile'));
+            },
+
+            updateTileFocus: function() {
+                // SAFELY USE ARRAY.FROM
+                Array.from(document.querySelectorAll('.tile.active')).forEach(t => t.classList.remove('active'));
+                if (this.gameOver) return;
+                if (this.currentRow >= 6) return;
+                const tile = this.getTile(this.currentRow, this.currentCol);
+                if (tile) tile.classList.add('active');
+            },
+
+            // ---- keyboard input ----
+            handleKey: function(key) {
+                if (this.gameOver || !this.isPlaying || this.isLoading) return;
+
+                const lower = key.toLowerCase();
+
+                if (lower === 'enter') {
+                    this.submitGuess();
+                    return;
+                }
+
+                if (lower === 'backspace') {
+                    this.deleteLetter();
+                    return;
+                }
+
+                if (/^[a-zA-Z0-9]$/.test(lower) && lower.length === 1) {
+                    this.addLetter(lower);
+                }
+            },
+
+            addLetter: function(char) {
+                if (this.gameOver) return;
+                if (this.currentRow >= 6) return;
+                if (this.currentCol >= 5) return;
+
+                const tile = this.getTile(this.currentRow, this.currentCol);
+                if (tile) {
+                    tile.textContent = char.toUpperCase();
+                    tile.classList.add('filled');
+                    this.currentCol++;
+                    this.updateTileFocus();
+                }
+            },
+
+            deleteLetter: function() {
+                if (this.gameOver) return;
+                if (this.currentRow >= 6) return;
+                if (this.currentCol === 0) return;
+
+                this.currentCol--;
+                const tile = this.getTile(this.currentRow, this.currentCol);
+                if (tile) {
+                    tile.textContent = '';
+                    tile.classList.remove('filled');
+                    this.updateTileFocus();
+                }
+            },
+
+            submitGuess: function() {
+                // Defensive catch block to completely eliminate silent game freezing
+                try {
+                    if (this.gameOver) return;
+                    if (this.currentRow >= 6) return;
+
+                    if (this.currentCol < 5) {
+                        const tiles = this.getRowTiles(this.currentRow);
+                        tiles.forEach(t => {
+                            t.classList.add('shake');
+                            setTimeout(() => t.classList.remove('shake'), 500);
+                        });
+                        this.el.feedbackArea.innerHTML =
+                            `<span style="color:var(--wrong);">not enough letters</span>`;
+                        setTimeout(() => {
+                            if (!this.gameOver) {
+                                if (this.debugMode) {
+                                    this.el.feedbackArea.innerHTML = `<span class="hint-text">🔍 ${this.answerWord.toUpperCase()}</span>`;
+                                } else {
+                                    this.el.feedbackArea.innerHTML = '';
+                                }
+                            }
+                        }, 1200);
+                        return;
+                    }
+
+                    const tiles = this.getRowTiles(this.currentRow);
+                    let guess = '';
+                    tiles.forEach(t => guess += (t.textContent || '').toLowerCase().trim());
+
+                    // Strictly validate word only if strictMode toggle is enabled
+                    if (this.strictMode && !this.wordPool.includes(guess) && !this.FALLBACK_WORDS.includes(guess)) {
+                        this.el.feedbackArea.innerHTML =
+                            `<span style="color:var(--wrong);">not a valid Tarkov word</span>`;
+                        tiles.forEach(t => {
+                            t.classList.add('shake');
+                            setTimeout(() => t.classList.remove('shake'), 500);
+                        });
+                        setTimeout(() => {
+                            if (!this.gameOver) {
+                                if (this.debugMode) {
+                                    this.el.feedbackArea.innerHTML = `<span class="hint-text">🔍 ${this.answerWord.toUpperCase()}</span>`;
+                                } else {
+                                    this.el.feedbackArea.innerHTML = '';
+                                }
+                            }
+                        }, 1400);
+                        return;
+                    }
+
+                    this.guesses.push(guess);
+
+                    const answerWord = this.answerWord || 'killa'; // Ultimate fallback safety
+                    const guessArr = guess.split('');
+                    const status = Array(5).fill('absent');
+
+                    // Map counts of each letter in the target word
+                    const letterCounts = {};
+                    for (let char of answerWord) {
+                        letterCounts[char] = (letterCounts[char] || 0) + 1;
+                    }
+
+                    // First pass: locate exact matches (correct positions)
+                    for (let i = 0; i < 5; i++) {
+                        if (guessArr[i] === answerWord[i]) {
+                            status[i] = 'correct';
+                            letterCounts[guessArr[i]]--;
+                        }
+                    }
+
+                    // Second pass: locate present but misaligned matches
+                    for (let i = 0; i < 5; i++) {
+                        if (status[i] === 'correct') continue;
+                        const char = guessArr[i];
+                        if (letterCounts[char] && letterCounts[char] > 0) {
+                            status[i] = 'present';
+                            letterCounts[char]--;
+                        }
+                    }
+
+                    // Apply changes and flip styles
+                    tiles.forEach((tile, idx) => {
+                        setTimeout(() => {
+                            tile.classList.remove('active');
+                            tile.classList.add(status[idx]);
+                            this.updateKeyboardKey(guessArr[idx], status[idx]);
+                        }, idx * 120 + 100);
+                    });
+
+                    const isWin = guess === answerWord;
+                    if (isWin) {
+                        this.win = true;
+                        this.gameOver = true;
+                        this.score += 1;
+                        this.updateScore();
+                        setTimeout(() => {
+                            this.el.feedbackArea.innerHTML =
+                                `<span class="correct-text">✓ GOT IT!</span> <span class="sub-text">+1 win</span>`;
+                            this.revealAnswer();
+                            this.setKeyboardEnabled(false);
+                            this.showPlayAgain();
+                        }, 800);
+                        this.currentRow++;
+                        this.currentCol = 0;
+                        return;
+                    }
+
+                    this.currentRow++;
+                    this.currentCol = 0; // CRITICAL BUG FIX: resets writing cursor for the next turn!
+
+                    if (this.currentRow >= 6) {
+                        this.gameOver = true;
+                        setTimeout(() => {
+                            this.el.feedbackArea.innerHTML =
+                                `<span class="wrong-text">✗ out of tries</span> <span class="sub-text">→ ${answerWord.toUpperCase()}</span>`;
+                            this.revealAnswer();
+                            this.setKeyboardEnabled(false);
+                            this.showPlayAgain();
+                        }, 800);
+                        return;
+                    }
+
+                    setTimeout(() => {
+                        this.updateTileFocus();
+                        if (this.debugMode) {
+                            this.el.feedbackArea.innerHTML = `<span class="hint-text">🔍 ${this.answerWord.toUpperCase()}</span>`;
+                        } else {
+                            this.el.feedbackArea.innerHTML = '';
+                        }
+                    }, 700);
+
+                } catch (gameErr) {
+                    // Catch unexpected runtime errors instead of silently freezing
+                    console.error("Game evaluation error:", gameErr);
+                    this.el.feedbackArea.innerHTML = `<span style="color:var(--wrong);">Error: Please refresh</span>`;
+                }
+            },
+
+            // ---- keyboard UI ----
+            buildKeyboard: function() {
+                const kb = this.el.keyboard;
+                kb.innerHTML = '';
+                kb.classList.add('active');
+
+                const rows = [
+                    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+                    ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+                    ['backspace', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'enter']
+                ];
+
+                rows.forEach(row => {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'kb-row';
+                    row.forEach(key => {
+                        const btn = document.createElement('button');
+                        btn.className = 'kb-key';
+                        if (key === 'backspace' || key === 'enter') {
+                            btn.classList.add('wide');
+                        }
+                        btn.dataset.key = key;
+
+                        let label = key.toUpperCase();
+                        if (key === 'backspace') label = '⌫';
+                        else if (key === 'enter') label = '↵';
+                        btn.textContent = label;
+
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (this.gameOver || !this.isPlaying) return;
+                            if (key === 'backspace') this.deleteLetter();
+                            else if (key === 'enter') this.submitGuess();
+                            else this.addLetter(key);
+                        });
+                        rowDiv.appendChild(btn);
+                    });
+                    kb.appendChild(rowDiv);
+                });
+
+                // Store key references for color updates safely
+                this.keyMap = {};
+                Array.from(document.querySelectorAll('.kb-key')).forEach(btn => {
+                    const k = btn.dataset.key;
+                    if (k) this.keyMap[k] = btn;
+                });
+
+                this.setKeyboardEnabled(true);
+            },
+
+            setKeyboardEnabled: function(enabled) {
+                Array.from(document.querySelectorAll('.kb-key')).forEach(btn => {
+                    btn.disabled = !enabled;
+                });
+            },
+
+            updateKeyboardKey: function(char, status) {
+                const key = char.toLowerCase();
+                const btn = this.keyMap?.[key];
+                if (!btn) return;
+                if (status === 'correct') {
+                    btn.className = 'kb-key correct';
+                } else if (status === 'present' && !btn.classList.contains('correct')) {
+                    btn.className = 'kb-key present';
+                } else if (status === 'absent' && !btn.classList.contains('correct') && !btn.classList.contains('present')) {
+                    btn.className = 'kb-key absent';
+                }
+            },
+
+            // ---- reveal answer ----
+            revealAnswer: function() {
+                const reveal = this.el.answerReveal;
+                this.el.answerWord.textContent = this.answerWord.toUpperCase();
+                const icon = this.el.answerIcon;
+                if (this.answerItem) {
+                    const url = this.answerItem.data.iconLink || this.answerItem.data.image4xLink || this.answerItem.data.imageLink || null;
+                    if (url) {
+                        icon.src = url;
+                        icon.style.display = 'inline-block';
+                        icon.onerror = () => { icon.style.display = 'none'; };
+                    } else {
+                        icon.style.display = 'none';
+                    }
+                } else {
+                    icon.style.display = 'none';
+                }
+                reveal.classList.add('visible');
+            },
+
+            showPlayAgain: function() {
+                const fb = this.el.feedbackArea;
+                const btn = document.createElement('button');
+                btn.textContent = '[ play again ]';
+                btn.style.cssText = `
+                    background: transparent;
+                    border: 1px solid var(--border);
+                    color: var(--text);
+                    font-family: var(--mono);
+                    font-size: 12px;
+                    padding: 6px 18px;
+                    cursor: pointer;
+                    margin-left: 12px;
+                    transition: border-color 0.2s;
+                `;
+                btn.onmouseover = () => { btn.style.borderColor = 'var(--text-dim)'; };
+                btn.onmouseout = () => { btn.style.borderColor = 'var(--border)'; };
+                btn.onclick = () => this.startGame();
+                fb.appendChild(btn);
+            },
+
+            // ---- start game ----
+            startGame: function() {
+                if (this.isLoading) return;
+                this.isLoading = true;
+                this.isPlaying = true;
+
+                this.el.startScreen.style.display = 'none';
+                this.el.wordleGrid.classList.add('active');
+                this.el.keyboard.classList.add('active');
+                this.el.feedbackArea.innerHTML = '';
+                this.el.answerReveal.classList.remove('visible');
+
+                Array.from(document.querySelectorAll('.kb-key')).forEach(btn => {
+                    btn.className = 'kb-key';
+                    btn.disabled = false;
+                });
+
+                this.initGame();
+                this.isLoading = false;
+                this.setStatus('playing', 'ready');
+            },
+
+            updateScore: function() {
+                this.el.scoreDisplay.textContent = this.score;
+            },
+
+            setStatus: function(text, state) {
+                const el = this.el.statusText;
+                const dot = this.el.statusDot;
+                if (el) el.textContent = text;
+                if (dot) {
+                    dot.className = 'dot';
+                    if (state === 'loading') dot.classList.add('loading');
+                    if (state === 'ready') dot.classList.add('ready');
+                }
+            },
+
+            // ============================================================
+            //  INIT
+            // ============================================================
+            init: async function() {
+                this.setStatus('loading data ...', 'loading');
+                this.el.startBtn.disabled = true;
+                this.el.wordCount.textContent = 'loading ...';
+
+                try {
+                    let data = null;
+                    try {
+                        data = await this.fetchAllData();
+                    } catch (apiError) {
+                        console.warn("API Call failed, falling back to offline game cache:", apiError);
+                        // Offline fallback so players are never stuck on a blank loading screen
+                        data = {
+                            items: this.FALLBACK_WORDS.map((w, index) => ({
+                                id: String(index),
+                                name: w,
+                                shortName: w,
+                                iconLink: null,
+                                wikiLink: null,
+                                types: [],
+                                category: { name: "fallback" }
+                            })),
+                            traders: []
+                        };
+                    }
+
+                    this.allItems = data.items || [];
+                    this.allTraders = data.traders || [];
+                    this.wordPool = this.buildWordPool(data);
+                    if (this.wordPool.length < 10) {
+                        this.wordPool = [...this.FALLBACK_WORDS];
+                    }
+
+                    this.el.wordCount.textContent = `${this.wordPool.length} words loaded`;
+                    this.el.startBtn.disabled = false;
+                    this.el.startBtn.textContent = '[ play ]';
+                    this.el.startIcon.textContent = '🎯';
+                    this.el.startTitle.textContent = 'TARKOV WORDLE';
+                    this.el.startSub.textContent =
+                        `Guess the 5‑letter Tarkov word in 6 tries. ${this.wordPool.length} words available.`;
+
+                    this.setStatus('ready', 'ready');
+
+                    // Set up event listeners for toggles
+                    this.el.debugToggle.addEventListener('change', () => {
+                        this.debugMode = this.el.debugToggle.checked;
+                        if (this.debugMode && this.answerWord && !this.gameOver) {
+                            this.el.feedbackArea.innerHTML =
+                                `<span class="hint-text">🔍 ${this.answerWord.toUpperCase()}</span>`;
+                        } else if (!this.debugMode) {
+                            if (!this.gameOver) this.el.feedbackArea.innerHTML = '';
+                        }
+                    });
+
+                    this.el.strictToggle.addEventListener('change', () => {
+                        this.strictMode = this.el.strictToggle.checked;
+                    });
+
+                    this.el.startBtn.addEventListener('click', () => this.startGame());
+
+                    // Physical keyboard handler
+                    document.addEventListener('keydown', (e) => {
+                        if (!this.isPlaying || this.gameOver) return;
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.handleKey('enter');
+                        } else if (e.key === 'Backspace') {
+                            e.preventDefault();
+                            this.handleKey('backspace');
+                        } else if (e.key.length === 1 && /^[a-zA-Z0-9]$/.test(e.key)) {
+                            this.handleKey(e.key);
+                        }
+                    });
+
+                } catch (err) {
+                    console.error('Init error:', err);
+                    this.setStatus('error', '');
+                    this.el.startBtn.disabled = true;
+                    this.el.wordCount.textContent = '⚠️ failed to load';
+                    document.querySelector('.game-area').innerHTML += `
+                        <div id="initErrorPanel" style="color:var(--wrong);font-family:var(--mono);font-size:12px;text-align:center;padding:16px;">
+                          ${err.message || 'unknown error'}
+                          <br />
+                          <button onclick="document.getElementById('initErrorPanel').remove(); WordleApp.init()" style="background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 20px;margin-top:8px;font-family:var(--mono);cursor:pointer;">
+                            ↻ retry
+                          </button>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => WordleApp.init());
+    </script>
+
+</body>
+</html>
