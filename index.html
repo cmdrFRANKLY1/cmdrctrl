@@ -36,7 +36,7 @@
         }
 
         .app {
-            max-width: 900px;
+            max-width: 800px;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -69,60 +69,44 @@
             font-family: var(--mono);
         }
 
-        /* category section */
-        .category {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .category-heading {
-            font-family: var(--mono);
-            font-size: 13px;
-            font-weight: 400;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--text-dim);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-        }
-
         .tool-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
-
-        /* single-card grid (for Resource Hub) */
-        .tool-grid.single {
-            grid-template-columns: 1fr;
-            max-width: 400px;
+        @media (max-width: 560px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .tool-card {
             border: 1px solid var(--border);
             background: var(--surface);
-            padding: 30px 20px;
+            padding: 40px 24px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
-            transition: border-color 0.2s;
+            gap: 14px;
+            transition: border-color 0.2s, background 0.2s;
             text-decoration: none;
             color: inherit;
+            min-height: 220px;
+            justify-content: center;
         }
         .tool-card:hover {
             border-color: var(--border-light);
+            background: #111;
         }
 
         .tool-card .icon {
-            font-size: 44px;
+            font-size: 56px;
             line-height: 1;
         }
         .tool-card h2 {
             font-family: var(--mono);
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
             letter-spacing: 0.5px;
@@ -133,6 +117,7 @@
             font-size: 14px;
             color: var(--text-dim);
             line-height: 1.5;
+            max-width: 260px;
         }
         .tool-card .arrow {
             color: var(--text-dim);
@@ -161,44 +146,32 @@
 
         <header class="header">
             <div class="header-title">TARKOV <span>TOOLKIT</span></div>
-            <div class="header-sub">launch a tool</div>
+            <div class="header-sub">select a category</div>
         </header>
 
-        <!-- Escape from Tarkov category -->
-        <section class="category">
-            <div class="category-heading">Escape from Tarkov</div>
-            <div class="tool-grid">
-                <a href="/EscapeFromTarkov/LoadoutGenerator/eftRndLdtGenV02.html" class="tool-card">
-                    <div class="icon">⚔️</div>
-                    <h2>LOADOUT GENERATOR</h2>
-                    <p>Random weapon &amp; armor builds with flea market pricing.</p>
-                    <div class="arrow">⏎</div>
-                </a>
+        <!-- Two main buttons -->
+        <div class="tool-grid">
 
-                <a href="/EscapeFromTarkov/Trivia/eftTriviaV02.html" class="tool-card">
-                    <div class="icon">🧠</div>
-                    <h2>TRIVIA</h2>
-                    <p>Test your knowledge on items, calibers, prices &amp; traders.</p>
-                    <div class="arrow">⏎</div>
-                </a>
-            </div>
-        </section>
+            <!-- Button 1: Escape from Tarkov -->
+            <a href="/EscapeFromTarkov/eftIndex.html" class="tool-card">
+                <div class="icon">🎯</div>
+                <h2>ESCAPE FROM TARKOV</h2>
+                <p>Loadout generator, trivia, official channels, community tools &amp; databases.</p>
+                <div class="arrow">⏎</div>
+            </a>
 
-        <!-- Resource Hub – general category -->
-        <section class="category">
-            <div class="category-heading">Resource Hub</div>
-            <div class="tool-grid single">
-                <a href="/EscapeFromTarkov/ResourceHUB/resourceHubV01.html" class="tool-card">
-                    <div class="icon">🗺️</div>
-                    <h2>RESOURCE HUB</h2>
-                    <p>Central dashboard for game resources, guides, maps, and community tools.</p>
-                    <div class="arrow">⏎</div>
-                </a>
-            </div>
-        </section>
+            <!-- Button 2: Tools & Accessibility -->
+            <a href="/ResourceHUB/resourceHubV01.html" class="tool-card">
+                <div class="icon">🛠️</div>
+                <h2>TOOLS &amp; ACCESSIBILITY</h2>
+                <p>Performance utilities, screen capture, macros, creator hubs &amp; general resources.</p>
+                <div class="arrow">⏎</div>
+            </a>
+
+        </div>
 
         <div class="footer-note">
-            select a tool to proceed
+            launch a tool to proceed
         </div>
 
     </div>
