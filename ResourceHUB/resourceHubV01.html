@@ -7,7 +7,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
   <style>
-    /* same styles as before – unchanged */
+    /* ==========================================================================
+       THEME & GLOBAL VARIABLES
+       ========================================================================== */
     :root {
       --app-bg: #0a0a0a;
       --panel-bg: #111;
@@ -25,7 +27,13 @@
       --tile-radius: 8px;
       --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       background: var(--app-bg);
       color: var(--text-primary);
@@ -35,11 +43,25 @@
       flex-direction: column;
       padding: 12px;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--panel-border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-secondary);
+    }
+
+    /* ==========================================================================
+       APP CONTAINER
+       ========================================================================== */
     .app-container {
       max-width: 1400px;
       margin: 0 auto;
@@ -49,6 +71,10 @@
       flex-direction: column;
       gap: 8px;
     }
+
+    /* ==========================================================================
+       TOP ROW / HEADER
+       ========================================================================== */
     .top-row {
       width: 100%;
       flex-shrink: 0;
@@ -56,6 +82,7 @@
       gap: 8px;
       align-items: stretch;
     }
+
     .back-btn-square {
       background: var(--header-bg);
       border: 1px solid var(--panel-border);
@@ -77,6 +104,7 @@
       color: var(--accent);
       border-color: var(--accent);
     }
+
     .app-header-title {
       flex: 1;
       background: var(--header-bg);
@@ -100,7 +128,9 @@
       color: var(--header-text);
       margin: 0;
     }
-    .app-header-title h1 span { color: var(--accent); }
+    .app-header-title h1 span {
+      color: var(--accent);
+    }
     .app-header-title .sub {
       font-size: 13px;
       color: var(--text-secondary);
@@ -112,6 +142,10 @@
       border-left: 2px solid var(--panel-border);
       padding-left: 16px;
     }
+
+    /* ==========================================================================
+       LINKS / RESOURCE HUB STYLES
+       ========================================================================== */
     .links-wrapper {
       padding: 8px 16px 24px 16px;
       overflow-y: auto;
@@ -123,6 +157,7 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
       margin-top: 4px;
     }
+
     .section-title {
       display: flex;
       align-items: center;
@@ -136,7 +171,9 @@
       transition: 0.15s;
       user-select: none;
     }
-    .section-title:first-child { margin-top: 0; }
+    .section-title:first-child {
+      margin-top: 0;
+    }
     .section-title:hover {
       border-color: var(--accent);
       background: var(--tile-hover);
@@ -164,7 +201,10 @@
       transition: transform 0.25s ease;
       font-size: 14px;
     }
-    .section-title .chevron.collapsed { transform: rotate(-90deg); }
+    .section-title .chevron.collapsed {
+      transform: rotate(-90deg);
+    }
+
     .section-body {
       overflow: hidden;
       transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
@@ -177,24 +217,7 @@
       margin: 0;
       padding: 0;
     }
-    .sub-section-title {
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      margin: 18px 0 6px 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .sub-section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, var(--panel-border), transparent);
-    }
+
     .dial-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -202,6 +225,7 @@
       padding-top: 6px;
       padding-bottom: 14px;
     }
+
     .dial-card {
       background: var(--tile-bg);
       border: 1px solid var(--tile-border);
@@ -263,8 +287,14 @@
       border-radius: 12px;
       border: 1px solid var(--panel-border);
     }
-    .l-badge.utility { color: #b39ddb; border-color: #7e57c2; }
-    .l-badge.creator { color: #ffb74d; border-color: #ffb74d; }
+    .l-badge.utility {
+      color: #b39ddb;
+      border-color: #7e57c2;
+    }
+    .l-badge.reference {
+      color: #4fc3f7;
+      border-color: #4fc3f7;
+    }
     .dial-card .external-icon {
       position: absolute;
       top: 12px;
@@ -278,79 +308,42 @@
       opacity: 0.8;
       color: var(--accent);
     }
-    .creator-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 12px;
-      width: 100%;
-    }
-    .creator-links a {
-      color: var(--text-secondary);
-      font-size: 14px;
-      transition: 0.15s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      text-decoration: none;
-    }
-    .creator-links a:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: var(--tile-hover);
-    }
-    .live-status {
-      min-height: 24px;
-      margin-top: 6px;
-    }
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #e53935;
-      color: #fff;
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 10px 2px 6px;
-      border-radius: 12px;
-      border: 1px solid #ff6b6b;
-      box-shadow: 0 0 12px rgba(229, 57, 53, 0.4);
-      animation: pulse-live 1.5s ease-in-out infinite;
-    }
-    .live-badge .dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      animation: blink 1.2s infinite;
-    }
-    @keyframes pulse-live {
-      0% { box-shadow: 0 0 6px rgba(229, 57, 53, 0.3); }
-      50% { box-shadow: 0 0 18px rgba(229, 57, 53, 0.8); }
-      100% { box-shadow: 0 0 6px rgba(229, 57, 53, 0.3); }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
+
+    /* ==========================================================================
+       RESPONSIVE
+       ========================================================================== */
     @media (max-width: 700px) {
-      .app-header-title .sub { display: none; }
-      .app-header-title h1 { font-size: 16px; }
-      .dial-grid { grid-template-columns: 1fr; }
-      .top-row { flex-wrap: wrap; }
-      .back-btn-square { width: 44px; font-size: 14px; }
-      .app-header-title { padding: 10px 16px; }
-      .app-header-title i { font-size: 20px; }
-      .links-wrapper { padding: 8px 10px 16px 10px; }
-      .section-title { padding: 10px 14px; }
-      .section-title h2 { font-size: 13px; }
+      .app-header-title .sub {
+        display: none;
+      }
+      .app-header-title h1 {
+        font-size: 16px;
+      }
+      .dial-grid {
+        grid-template-columns: 1fr;
+      }
+      .top-row {
+        flex-wrap: wrap;
+      }
+      .back-btn-square {
+        width: 44px;
+        font-size: 14px;
+      }
+      .app-header-title {
+        padding: 10px 16px;
+      }
+      .app-header-title i {
+        font-size: 20px;
+      }
+      .links-wrapper {
+        padding: 8px 10px 16px 10px;
+      }
+      .section-title {
+        padding: 10px 14px;
+      }
+      .section-title h2 {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -371,7 +364,7 @@
 
     <div class="links-wrapper">
 
-      <!-- TOOLS & UTILITIES (kept) -->
+      <!-- TOOLS & UTILITIES -->
       <div class="section-title" onclick="toggleSection('toolsBody', this)">
         <i class="fas fa-tools"></i>
         <h2>Tools &amp; Utilities</h2>
@@ -382,21 +375,24 @@
         <div class="dial-grid" id="toolsGrid"></div>
       </div>
 
-      <!-- CONTENT CREATORS (kept) -->
-      <div class="section-title" onclick="toggleSection('creatorBody', this)">
-        <i class="fas fa-user-astronaut"></i>
-        <h2>Content Creators</h2>
-        <span class="count" id="creatorCount">0</span>
+      <!-- IMPORTANT WEBSITES (replaces Content Creators) -->
+      <div class="section-title" onclick="toggleSection('websitesBody', this)">
+        <i class="fas fa-globe"></i>
+        <h2>Important Websites</h2>
+        <span class="count" id="websitesCount">0</span>
         <i class="fas fa-chevron-down chevron"></i>
       </div>
-      <div class="section-body" id="creatorBody">
-        <div class="dial-grid" id="creatorGrid"></div>
+      <div class="section-body" id="websitesBody">
+        <div class="dial-grid" id="websitesGrid"></div>
       </div>
 
     </div>
   </div>
 
   <script>
+    /* ==========================================================================
+       TOGGLE SECTION (Collapse / Expand)
+       ========================================================================== */
     function toggleSection(id, element) {
       const body = document.getElementById(id);
       const chevron = element.querySelector('.chevron');
@@ -404,7 +400,11 @@
       chevron.classList.toggle('collapsed');
     }
 
-    // ---- DATA (only general tools & creators) ----
+    /* ==========================================================================
+       DATA & RENDER LOGIC
+       ========================================================================== */
+
+    // ---- TOOLS & UTILITIES ----
     const tools = [
       { name: 'AutoHotkey', desc: 'Macro execution & system automation script compiler', icon: 'fas fa-keyboard', url: 'https://www.autohotkey.com/', badge: 'utility' },
       { name: 'FPS Monitor', desc: 'Diagnostic hardware resource overlay displays', icon: 'fas fa-desktop', url: 'https://fpsmonitor.com/', badge: 'utility' },
@@ -417,17 +417,19 @@
       { name: 'VoiceAttack', desc: 'Control keyboard parameters using customized voice briefs', icon: 'fas fa-microphone', url: 'https://voiceattack.com/', badge: 'utility' }
     ];
 
-    const creators = [
-      { name: 'AquaFPS', desc: 'Lighthearted entertainment & casual combat highlights.', icon: 'fa-water', twitch: 'aquafps', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/aquafps' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/AquaFPS' }, { icon: 'fab fa-discord', url: 'https://discord.gg/aquafps' }] },
-      { name: 'DesmondPilak', desc: 'Raid tactical flow explanations & firefight breakdowns.', icon: 'fa-crosshairs', twitch: 'desmondpilak', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/desmondpilak' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/channel/UCdTbUmM1tW16nC4xcCHl1EA' }, { icon: 'fab fa-discord', url: 'https://discord.com/invite/4PpD9jw' }] },
-      { name: 'Glorious_E', desc: 'Elite close-quarters combat demonstrations & system tutorials.', icon: 'fa-bolt', twitch: 'glorious_e', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/glorious_e' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/Glorious_E' }, { icon: 'fab fa-discord', url: 'https://discord.gg/glorious_e' }] },
-      { name: 'LVNDMARK', desc: 'Refined aggressive PvP techniques & rapid firefight strategies.', icon: 'fa-skull', twitch: 'lvndmark', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/lvndmark' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/LVNDMARK' }, { icon: 'fab fa-discord', url: 'https://discord.gg/2gCdVEJ' }] },
-      { name: 'NoGenerals', desc: 'High-speed team strategy execution guides & personal coaching lectures.', icon: 'fa-flag', twitch: 'nogenerals', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/nogenerals' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/channel/UCHq5dMef0I3q6LJGsE3r6Gg' }, { icon: 'fab fa-discord', url: 'https://discord.com/invite/adk73RWDdy' }] },
-      { name: 'Pestily', desc: 'High-level guide strategist with extensive tactical instructionals.', icon: 'fa-crown', twitch: 'pestily', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/pestily' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/c/pestily' }, { icon: 'fab fa-discord', url: 'https://discord.gg/pestily' }] },
-      { name: 'VeryBadSCAV', desc: 'Specialized strategy analysis, map flow, and general coaching guides.', icon: 'fa-helmet-safety', twitch: 'verybadscav', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/verybadscav' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/@VeryBadSCAV/streams' }, { icon: 'fab fa-discord', url: 'https://discord.gg/AmuWBRMnVQ' }] },
-      { name: 'WillerZ', desc: 'Incredible movement, dynamic jump routes, & precision combat highlights.', icon: 'fa-bullseye', twitch: 'willerz', links: [{ icon: 'fab fa-twitch', url: 'https://www.twitch.tv/willerz' }, { icon: 'fab fa-youtube', url: 'https://www.youtube.com/channel/UCJ1TewoP2hHJnA-JWLvLNAg' }] }
+    // ---- IMPORTANT WEBSITES (new) ----
+    const websites = [
+      { name: 'Wikipedia', desc: 'Free online encyclopedia covering almost every topic.', icon: 'fab fa-wikipedia-w', url: 'https://www.wikipedia.org/', badge: 'reference' },
+      { name: 'dict.leo', desc: 'German-English dictionary and translation tool.', icon: 'fas fa-language', url: 'https://www.leo.org/', badge: 'reference' },
+      { name: 'Google Translate', desc: 'Instant translation service for over 100 languages.', icon: 'fas fa-language', url: 'https://translate.google.com/', badge: 'reference' },
+      { name: 'Stack Overflow', desc: 'Community Q&A platform for programmers.', icon: 'fab fa-stack-overflow', url: 'https://stackoverflow.com/', badge: 'reference' },
+      { name: 'GitHub', desc: 'Version control hosting and collaborative development platform.', icon: 'fab fa-github', url: 'https://github.com/', badge: 'reference' },
+      { name: 'Wolfram Alpha', desc: 'Computational knowledge engine for facts and data.', icon: 'fas fa-calculator', url: 'https://www.wolframalpha.com/', badge: 'reference' },
+      { name: 'Reddit', desc: 'Front page of the internet with forums on every topic.', icon: 'fab fa-reddit', url: 'https://www.reddit.com/', badge: 'reference' },
+      { name: 'Internet Archive', desc: 'Digital library of free books, movies, and web pages.', icon: 'fas fa-archive', url: 'https://archive.org/', badge: 'reference' }
     ];
 
+    // ---- RENDER HELPER ----
     function renderCards(data, containerId) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -442,55 +444,15 @@
       `).join('');
     }
 
-    function renderCreators() {
-      const container = document.getElementById('creatorGrid');
-      if (!container) return;
-      container.innerHTML = creators.map(creator => {
-        const linksHtml = creator.links.map(l => `<a href="${l.url}" target="_blank" title="Link"><i class="${l.icon}"></i></a>`).join('');
-        return `
-          <div class="dial-card" style="cursor: default;" data-creator="${creator.twitch}">
-            <div class="icon-wrap"><i class="fas ${creator.icon}"></i></div>
-            <div class="card-title">${creator.name}</div>
-            <div class="card-desc">${creator.desc}</div>
-            <div class="creator-links">${linksHtml}</div>
-            <span class="l-badge creator">creator</span>
-            <div class="live-status"></div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function updateLiveBadges() {
-      const cards = document.querySelectorAll('#creatorGrid .dial-card[data-creator]');
-      for (const card of cards) {
-        const username = card.dataset.creator;
-        if (!username) continue;
-        try {
-          const res = await fetch(`https://api.twitchinsights.net/v1/channel/${username}`, { signal: AbortSignal.timeout(6000) });
-          if (res.ok) {
-            const data = await res.json();
-            const liveContainer = card.querySelector('.live-status');
-            if (liveContainer) {
-              if (data.live === true) {
-                liveContainer.innerHTML = `<span class="live-badge"><span class="dot"></span> LIVE ON TWITCH</span>`;
-              } else {
-                liveContainer.innerHTML = '';
-              }
-            }
-          }
-        } catch (_) { /* ignore */ }
-      }
-    }
-
+    // ---- INIT ----
     function init() {
+      // Render Tools
       renderCards(tools, 'toolsGrid');
-      renderCreators();
       document.getElementById('toolsCount').textContent = tools.length;
-      document.getElementById('creatorCount').textContent = creators.length;
-      setTimeout(() => {
-        updateLiveBadges();
-        setInterval(updateLiveBadges, 60000);
-      }, 500);
+
+      // Render Websites
+      renderCards(websites, 'websitesGrid');
+      document.getElementById('websitesCount').textContent = websites.length;
     }
 
     document.addEventListener('DOMContentLoaded', init);
