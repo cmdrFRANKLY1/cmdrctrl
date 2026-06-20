@@ -1,180 +1,354 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tarkov Toolkit</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Hub</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
 
         :root {
-            --bg: #000000;
-            --surface: #0a0a0a;
-            --border: #2a2a2a;
-            --border-light: #3a3a3a;
-            --text: #e8e8e8;
-            --text-dim: #777777;
-            --text-muted: #444444;
-            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --mono: Consolas, "Courier New", monospace;
+            --bg-color: #030303;
+            --surface-color: rgba(18, 18, 18, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --glow-color: rgba(255, 255, 255, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            overflow-x: hidden;
         }
 
-        .app {
-            max-width: 800px;
-            width: 100%;
+        /* Sleek Status Bar */
+        .status-bar {
+            margin-top: 24px;
+            width: calc(100% - 48px);
+            max-width: 500px;
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 9999px;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            animation: fadeInDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        .status-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-secondary);
+        }
+
+        .status-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* Main Hub Layout */
+        .hub-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 32px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px 24px;
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .header {
-            border: 1px solid var(--border);
-            background: var(--surface);
-            padding: 18px 22px;
+        .hub-header {
             text-align: center;
+            margin-bottom: 48px;
         }
 
-        .header-title {
-            font-weight: 700;
-            font-size: 22px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #fff;
-        }
-        .header-title span {
+        .hub-title {
+            font-size: 1.75rem;
             font-weight: 300;
-            color: var(--text-dim);
-        }
-        .header-sub {
-            font-size: 12px;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            margin-top: 4px;
-            font-family: var(--mono);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #ffffff;
+            margin-bottom: 8px;
         }
 
-        .tool-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .hub-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.05em;
         }
-        @media (max-width: 560px) {
-            .tool-grid {
-                grid-template-columns: 1fr;
+
+        /* Modern Grid Cards */
+        .grid-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .card-link {
+            position: relative;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 32px 24px;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 24px;
+            height: 160px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Soft inner gradient for depth on hover */
+        .card-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255,255,255,0.04), transparent 40%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .card-link:hover::before {
+            opacity: 1;
+        }
+
+        .card-link:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-hover);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-link:hover .card-icon {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .card-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: fill 0.4s ease;
+        }
+
+        .card-details {
+            z-index: 2;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-arrow {
+            font-size: 1.2rem;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-block;
+        }
+
+        .card-link:hover .card-arrow {
+            transform: translateX(4px);
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        .tool-card {
-            border: 1px solid var(--border);
-            background: var(--surface);
-            padding: 40px 24px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 14px;
-            transition: border-color 0.2s, background 0.2s;
-            text-decoration: none;
-            color: inherit;
-            min-height: 220px;
-            justify-content: center;
-        }
-        .tool-card:hover {
-            border-color: var(--border-light);
-            background: #111;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .tool-card .icon {
-            font-size: 56px;
-            line-height: 1;
-        }
-        .tool-card h2 {
-            font-family: var(--mono);
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .tool-card p {
-            font-family: var(--font);
-            font-size: 14px;
-            color: var(--text-dim);
-            line-height: 1.5;
-            max-width: 260px;
-        }
-        .tool-card .arrow {
-            color: var(--text-dim);
-            font-size: 18px;
-            font-family: var(--mono);
-            margin-top: 4px;
-            transition: color 0.2s;
-        }
-        .tool-card:hover .arrow {
-            color: #fff;
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
         }
 
-        .footer-note {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-muted);
-            font-family: var(--mono);
-            border-top: 1px solid var(--border);
-            padding-top: 16px;
+        @media (max-width: 640px) {
+            .grid-links {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                padding: 10px 16px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="app">
+    <!-- Floating Sleek Status Bar -->
+    <header class="status-bar">
+        <div class="status-item">
+            <span class="status-dot"></span>
+            <div>
+                <div class="status-label">Time</div>
+                <div class="status-value" id="live-time">00:00:00</div>
+            </div>
+        </div>
+        <div style="width: 1px; height: 24px; background: var(--border-color);"></div>
+        <div class="status-item">
+            <div>
+                <div class="status-label" style="text-align: right;">Date</div>
+                <div class="status-value" id="live-date">Loading...</div>
+            </div>
+        </div>
+    </header>
 
-        <header class="header">
-            <div class="header-title">TARKOV <span>TOOLKIT</span></div>
-            <div class="header-sub">select a category</div>
+    <!-- Main Navigation Content -->
+    <main class="hub-container">
+        <header class="hub-header">
+            <h1 class="hub-title">Navigation</h1>
+            <p class="hub-subtitle">Select a destination below</p>
         </header>
-
-        <!-- Two main buttons -->
-        <div class="tool-grid">
-
-            <!-- Button 1: Escape from Tarkov -->
-            <a href="/EscapeFromTarkov/eftIndex.html" class="tool-card">
-                <div class="icon">🎯</div>
-                <h2>ESCAPE FROM TARKOV</h2>
-                <p>Loadout generator, trivia, official channels, community tools &amp; databases.</p>
-                <div class="arrow">⏎</div>
+        
+        <div class="grid-links">
+            <!-- Escape From Tarkov Card -->
+            <a href="/EscapeFromTarkov/eftIndex.html" class="card-link">
+                <div class="card-icon">
+                    <!-- Custom crosshair/scope SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.54-7.49-7.49H7v-2H5.51c.49-3.95 3.54-7 7.49-7.49V5h2v1.51c3.95.49 7 3.54 7.49 7.49H19v2h1.51c-.49 3.95-3.54 7-7.49 7.49V19h-2zm-1-5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    </svg>
+                </div>
+                <div class="card-details">
+                    <h2 class="card-title">Escape from Tarkov <span class="card-arrow">→</span></h2>
+                    <p class="card-desc">Curated Tarkov Stuff</p>
+                </div>
             </a>
 
-            <!-- Button 2: Tools & Accessibility -->
-            <a href="/ResourceHUB/resourceHubV01.html" class="tool-card">
-                <div class="icon">🛠️</div>
-                <h2>TOOLS &amp; ACCESSIBILITY</h2>
-                <p>Performance utilities, screen capture, macros, creator hubs &amp; general resources.</p>
-                <div class="arrow">⏎</div>
+            <!-- Resource HUB Card -->
+            <a href="/ResourceHUB/resourceHubV01.html" class="card-link">
+                <div class="card-icon">
+                    <!-- Custom stack/database SVG -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/>
+                    </svg>
+                </div>
+                <div class="card-details">
+                    <h2 class="card-title">Resource HUB <span class="card-arrow">→</span></h2>
+                    <p class="card-desc">General Tools & Accessibility Feautures</p>
+                </div>
             </a>
-
         </div>
+    </main>
 
-        <div class="footer-note">
-            launch a tool to proceed
-        </div>
+    <script>
+        // Smooth system clock & date updater
+        function updateDateTime() {
+            const now = new Date();
+            
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('live-time').textContent = now.toLocaleTimeString(undefined, timeOptions);
+            
+            const dateOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            document.getElementById('live-date').textContent = now.toLocaleDateString(undefined, dateOptions);
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
 
-    </div>
-
+        // Mouse hover dynamic spotlight effect on the cards
+        const cards = document.querySelectorAll('.card-link');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
 </body>
 </html>
