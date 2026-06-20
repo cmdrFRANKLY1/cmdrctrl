@@ -36,11 +36,11 @@
         }
 
         .app {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 32px;
         }
 
         .header {
@@ -69,15 +69,34 @@
             font-family: var(--mono);
         }
 
+        /* category section */
+        .category {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .category-heading {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
         .tool-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
         }
-        @media (max-width: 560px) {
-            .tool-grid {
-                grid-template-columns: 1fr;
-            }
+
+        /* single-card grid (for Resource Hub) */
+        .tool-grid.single {
+            grid-template-columns: 1fr;
+            max-width: 400px;
         }
 
         .tool-card {
@@ -125,6 +144,15 @@
         .tool-card:hover .arrow {
             color: #fff;
         }
+
+        .footer-note {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--mono);
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
     </style>
 </head>
 <body>
@@ -136,25 +164,40 @@
             <div class="header-sub">launch a tool</div>
         </header>
 
-        <div class="tool-grid">
+        <!-- Escape from Tarkov category -->
+        <section class="category">
+            <div class="category-heading">Escape from Tarkov</div>
+            <div class="tool-grid">
+                <a href="/EscapeFromTarkov/LoadoutGenerator/eftRndLdtGenV02.html" class="tool-card">
+                    <div class="icon">⚔️</div>
+                    <h2>LOADOUT GENERATOR</h2>
+                    <p>Random weapon &amp; armor builds with flea market pricing.</p>
+                    <div class="arrow">⏎</div>
+                </a>
 
-            <a href="/EscapeFromTarkov/LoadoutGenerator/eftRndLdtGenV02.html" class="tool-card">
-                <div class="icon">⚔️</div>
-                <h2>LOADOUT GENERATOR</h2>
-                <p>Random weapon &amp; armor builds with flea market pricing.</p>
-                <div class="arrow">⏎</div>
-            </a>
+                <a href="/EscapeFromTarkov/Trivia/eftTriviaV02.html" class="tool-card">
+                    <div class="icon">🧠</div>
+                    <h2>TRIVIA</h2>
+                    <p>Test your knowledge on items, calibers, prices &amp; traders.</p>
+                    <div class="arrow">⏎</div>
+                </a>
+            </div>
+        </section>
 
-            <a href="/EscapeFromTarkov/Trivia/eftTriviaV02.html" class="tool-card">
-                <div class="icon">🧠</div>
-                <h2>TRIVIA</h2>
-                <p>Test your knowledge on items, calibers, prices &amp; traders.</p>
-                <div class="arrow">⏎</div>
-            </a>
+        <!-- Resource Hub – general category -->
+        <section class="category">
+            <div class="category-heading">Resource Hub</div>
+            <div class="tool-grid single">
+                <a href="/EscapeFromTarkov/ResourceHUB/resourceHubV01.html" class="tool-card">
+                    <div class="icon">🗺️</div>
+                    <h2>RESOURCE HUB</h2>
+                    <p>Central dashboard for game resources, guides, maps, and community tools.</p>
+                    <div class="arrow">⏎</div>
+                </a>
+            </div>
+        </section>
 
-        </div>
-
-        <div style="text-align:center; font-size:11px; color:var(--text-muted); font-family:var(--mono); border-top:1px solid var(--border); padding-top:16px;">
+        <div class="footer-note">
             select a tool to proceed
         </div>
 
