@@ -706,7 +706,7 @@
             currentQuestion: null,
             score: 0,
             lives: 3,
-            gameOver: false,
+            isGameOver: false, // RENAME TO AVOID OVERLAPPING WITH METHOD
             isAnswered: false,
             isLoading: false,
             isShuffling: false,
@@ -1191,7 +1191,7 @@
 
             // ---- game over ----
             gameOver: function() {
-                this.gameOver = true;
+                this.isGameOver = true; // Use renamed property
                 this.isLoading = false;
                 if (this.advanceTimeout) {
                     clearTimeout(this.advanceTimeout);
@@ -1259,7 +1259,7 @@
 
             // ---- handle answer ----
             handleAnswer: function(index, correctIndex) {
-                if (this.isAnswered || this.isLoading || this.isShuffling || this.gameOver) return;
+                if (this.isAnswered || this.isLoading || this.isShuffling || this.isGameOver) return; // Use renamed property
                 this.isAnswered = true;
 
                 const isCorrect = index === correctIndex;
@@ -1297,7 +1297,7 @@
                         this.lives -= 1;
                         this.updateLivesDisplay();
                         if (this.lives === 0) {
-                            this.gameOver();
+                            this.gameOver(); // Correctly fires the gameOver method
                             return;
                         }
                     }
@@ -1308,7 +1308,7 @@
                 this.isLoading = true;
                 if (this.advanceTimeout) clearTimeout(this.advanceTimeout);
                 this.advanceTimeout = setTimeout(() => {
-                    if (this.gameOver) return;
+                    if (this.isGameOver) return; // Use renamed property
                     this.isLoading = false;
                     this.nextQuestion();
                 }, 2000);
@@ -1345,7 +1345,7 @@
                 // Reset state
                 this.lives = 3;
                 this.score = 0;
-                this.gameOver = false;
+                this.isGameOver = false; // Use renamed property
                 this.updateLivesDisplay();
                 this.el.scoreDisplay.textContent = '0';
 
@@ -1439,7 +1439,7 @@
 
                     this.el.debugToggle.addEventListener('change', () => {
                         this.debugMode = this.el.debugToggle.checked;
-                        if (this.currentQuestion && !this.isAnswered && !this.isShuffling && !this.gameOver) {
+                        if (this.currentQuestion && !this.isAnswered && !this.isShuffling && !this.isGameOver) { // Use renamed property
                             const q = this.currentQuestion;
                             const btns = this.el.optionsGrid.querySelectorAll('.option-btn');
                             if (q.correctIndex !== undefined) {
