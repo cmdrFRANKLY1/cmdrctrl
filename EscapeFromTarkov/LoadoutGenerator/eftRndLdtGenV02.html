@@ -655,7 +655,7 @@
             <header class="header">
                 <div>
                     <div class="header-title">Tarkov Loadout <span>Generator</span></div>
-                    <div class="header-sub">Flea-Market Only · Live Pricing</div>
+                    <div class="header-sub">Flea-Market Only · Live Cached Pricing</div>
                 </div>
                 <div class="header-status">
                     <span class="dot" id="statusDot"></span>
@@ -721,7 +721,10 @@
         //  Reels Layout + Robust Substring & Type Categorization Logic
         // ================================================================
         const App = {
-            API_URL: 'https://api.tarkov.dev/graphql',
+            // Local Vercel proxy route
+            PROXY_URL: '/api/tarkov-data',
+            // Fallback direct URL if the serverless routing is unavailable
+            FALLBACK_API_URL: 'https://api.tarkov.dev/graphql',
 
             ALL_CATEGORIES: [
                 'PrimaryWeapon', 'SecondaryWeapon', 'Pistol',
@@ -756,35 +759,57 @@
             totalCats: 0,
             enabledCategories: {},  
 
-            // ---- Fetch items ----
+            // ---- Fetch items (Tries proxy first, falls back directly to API) ----
             fetchAll: async function() {
-                const q = `
-                query {
-                    pvp: items(lang: en, gameMode: regular) {
-                        id name shortName wikiLink iconLink basePrice weight avg24hPrice types
-                        category { name }
-                        properties { __typename
-                            ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
-                            ... on ItemPropertiesArmor { class durability }
-                        }
-                    }
-                    pve: items(lang: en, gameMode: pve) { id avg24hPrice }
-                }`;
+                try {
+                    // Update status: Reading from Local Cache
+                    this.setStatus('READING CACHED DATA...', 'loading');
 
-                const r = await fetch(this.API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: q })
-                });
-                const j = await r.json();
-                if (j.errors) throw new Error(j.errors[0].message);
-                
-                const pvp = j.data.pvp || [];
-                const pve = j.data.pve || [];
+                    // 1. Attempt Vercel Edge Serverless Caching Layer
+                    const r = await fetch(this.PROXY_URL);
+                    if (!r.ok) {
+                        throw new Error(`Proxy returned status: ${r.status}`);
+                    }
+                    const j = await r.json();
+                    return this.parseResponse(j);
+                } catch (proxyError) {
+                    console.warn("Vercel API Cache unreachable, falling back directly to Tarkov API:", proxyError);
+                    
+                    // Update status: Fetching from Online API directly
+                    this.setStatus('GETTING ONLINE DATA...', 'loading');
+
+                    // 2. Direct Fallback connection to tarkov.dev
+                    const q = `
+                    query {
+                        pvp: items(lang: en, gameMode: regular) {
+                            id name shortName wikiLink iconLink basePrice weight avg24hPrice types
+                            category { name }
+                            properties { __typename
+                                ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
+                                ... on ItemPropertiesArmor { class durability }
+                            }
+                        }
+                        pve: items(lang: en, gameMode: pve) { id avg24hPrice }
+                    }`;
+
+                    const r = await fetch(this.FALLBACK_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q })
+                    });
+                    
+                    const j = await r.json();
+                    if (j.errors) throw new Error(j.errors[0].message);
+                    return this.parseResponse(j);
+                }
+            },
+
+            parseResponse: function(jsonPayload) {
+                const pvp = jsonPayload.data.pvp || [];
+                const pve = jsonPayload.data.pve || [];
                 const pveMap = {};
                 for (const it of pve) pveMap[it.id] = it.avg24hPrice;
                 for (const it of pvp) it.pvePrice = pveMap[it.id] || null;
-                
                 return pvp;
             },
 
@@ -1262,7 +1287,7 @@
             },
 
             init: async function() {
-                this.setStatus('FETCHING API...', 'loading');
+                this.setStatus('INITIALIZING...', 'loading');
                 
                 for (const c of this.ALL_CATEGORIES) {
                     this.enabledCategories[c] = true;
