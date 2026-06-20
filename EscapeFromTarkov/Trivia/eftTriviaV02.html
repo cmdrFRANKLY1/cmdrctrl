@@ -1235,7 +1235,8 @@
                 this.performShuffle(question.displayIcon, () => {
                     // After shuffle completes
                     if (question.type === 'trader') {
-                        this.el.iconLabel.textContent = '🧑‍💼 ' + question.correct.name;
+                        // Don't reveal the correct trader name
+                        this.el.iconLabel.textContent = '';
                         // Render options directly for trader
                         const options = question.options.map(i => ({
                             text: question.getOptionDisplay(i),
