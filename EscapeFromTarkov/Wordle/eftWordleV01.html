@@ -49,6 +49,36 @@
             gap: 18px;
         }
 
+        /* ===== TOP CONTAINER ===== */
+        .top-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* ===== BACK BUTTON ===== */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            font-family: var(--mono);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 0 18px;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+            color: #fff;
+        }
+
         /* ===== HEADER ===== */
         .header {
             border: 1px solid var(--border);
@@ -59,6 +89,7 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
+            flex: 1; /* Allows header to fill remaining row space next to the back button */
         }
 
         .header-title {
@@ -590,32 +621,38 @@
 <body>
 
     <div class="app">
-        <!-- HEADER -->
-        <header class="header">
-            <div>
-                <div class="header-title">TARKOV <span>WORDLE</span></div>
-                <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);letter-spacing:0.5px;">
-                    guess the 5‑letter word
+        <!-- TOP NAVIGATION ROW -->
+        <div class="top-row">
+            <!-- BACK BUTTON -->
+            <a href="/EscapeFromTarkov/eftIndex.html" class="back-btn" title="Back to Index">←</a>
+            
+            <!-- HEADER -->
+            <header class="header">
+                <div>
+                    <div class="header-title">TARKOV <span>WORDLE</span></div>
+                    <div style="font-size:10px;color:var(--text-muted);font-family:var(--mono);letter-spacing:0.5px;">
+                        guess the 5‑letter word
+                    </div>
                 </div>
-            </div>
-            <div class="header-right">
-                <div class="header-score">
-                    🏆 <span class="score-value" id="scoreDisplay">0</span>
+                <div class="header-right">
+                    <div class="header-score">
+                        🏆 <span class="score-value" id="scoreDisplay">0</span>
+                    </div>
+                    <label class="debug-toggle">
+                        <input type="checkbox" id="strictToggle" />
+                        strict
+                    </label>
+                    <label class="debug-toggle">
+                        <input type="checkbox" id="debugToggle" />
+                        debug
+                    </label>
+                    <div class="header-status">
+                        <span class="dot" id="statusDot"></span>
+                        <span id="statusText">initializing ...</span>
+                    </div>
                 </div>
-                <label class="debug-toggle">
-                    <input type="checkbox" id="strictToggle" />
-                    strict
-                </label>
-                <label class="debug-toggle">
-                    <input type="checkbox" id="debugToggle" />
-                    debug
-                </label>
-                <div class="header-status">
-                    <span class="dot" id="statusDot"></span>
-                    <span id="statusText">initializing ...</span>
-                </div>
-            </div>
-        </header>
+            </header>
+        </div>
 
         <!-- GAME -->
         <div class="game-area" id="gameArea">

@@ -44,11 +44,43 @@
             gap: 36px;
         }
 
+        /* ===== TOP CONTAINER ===== */
+        .top-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* ===== BACK BUTTON ===== */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            text-decoration: none;
+            font-family: var(--mono);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 0 18px;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background: #1a1a1a;
+            border-color: var(--border-light);
+            color: #fff;
+        }
+
+        /* ===== HEADER ===== */
         .header {
             border: 1px solid var(--border);
             background: var(--surface);
             padding: 18px 22px;
             text-align: center;
+            flex: 1; /* Fills remaining space next to the back button */
         }
         .header-title {
             font-weight: 700;
@@ -228,10 +260,17 @@
 
 <div class="app">
 
-    <header class="header">
-        <div class="header-title">TARKOV <span>INDEX</span></div>
-        <div class="header-sub">core tools · resources</div>
-    </header>
+    <!-- TOP NAVIGATION ROW -->
+    <div class="top-row">
+        <!-- BACK BUTTON TO HOME ROOT -->
+        <a href="/index.html" class="back-btn" title="Back to Homepage">←</a>
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-title">TARKOV <span>INDEX</span></div>
+            <div class="header-sub">core tools · resources</div>
+        </header>
+    </div>
 
     <section>
         <div class="section-heading">⚙️ Primary Tools</div>
